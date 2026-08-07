@@ -1,0 +1,6 @@
+{
+  "name": "Fanmahal Official",
+  "description": "A free-to-play fantasy prediction game for Indian reality TV shows like Bigg Boss. Stake Fan Coins, earn Crowns, and climb the royal leaderboard!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,33 @@
+{
+  "entities": {
+    "users": {
+      "title": "Users",
+      "description": "User profiles with phone OTP auth and coin balances",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "displayName": { "type": "string" },
+        "fanCoins": { "type": "number" },
+        "crowns": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid"]
+    },
+    "predictions": {
+      "title": "Predictions",
+      "description": "User submitted predictions on reality TV shows",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "cardId": { "type": "string" },
+        "optionId": { "type": "string" },
+        "stakedCoins": { "type": "number" },
+        "potentialCrowns": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "cardId", "optionId"]
+    }
+  }
+}

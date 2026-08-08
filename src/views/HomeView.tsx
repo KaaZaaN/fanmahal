@@ -15,6 +15,7 @@ export const HomeView: React.FC = () => {
     setShowAdModal,
     setShowReferralModal,
     setShowSimulatorModal,
+    youtubeRaffleNotice,
   } = useGame();
 
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
@@ -220,6 +221,43 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* YOUTUBE LIVE STREAM RAFFLE NOTICE BANNER */}
+      {youtubeRaffleNotice && youtubeRaffleNotice.active && (
+        <div className="bg-gradient-to-r from-[#2B0352] via-[#520338] to-[#1F023E] border border-rose-500/40 rounded-2xl p-4 shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-3 bg-rose-500/20 rounded-2xl border border-rose-500/40 shrink-0">
+              <span className="text-2xl">📺</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-600 text-white shadow-sm">
+                  YOUTUBE LIVE STREAM
+                </span>
+                <span className="text-xs font-mono font-bold text-amber-300">
+                  🗓️ {youtubeRaffleNotice.scheduledDate}
+                </span>
+              </div>
+              <h3 className="text-sm sm:text-base font-extrabold text-white mt-1">
+                {youtubeRaffleNotice.title}
+              </h3>
+              <p className="text-xs text-purple-200/80 mt-0.5 max-w-xl">
+                {youtubeRaffleNotice.note}
+              </p>
+            </div>
+          </div>
+
+          <a
+            href={youtubeRaffleNotice.youtubeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-rose-500 via-red-500 to-rose-600 hover:opacity-90 text-white font-black text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2 shrink-0 border border-rose-400/40"
+          >
+            <span>Watch Live Raffle Stream</span>
+            <span className="text-xs">➔</span>
+          </a>
+        </div>
+      )}
 
       {/* FILTER BAR & SEARCH */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#170234] p-4 rounded-2xl border border-purple-800/40">

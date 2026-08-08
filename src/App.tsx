@@ -10,11 +10,60 @@ import { RaffleSimulatorModal } from './components/RaffleSimulatorModal';
 import { HomeView } from './views/HomeView';
 import { LeaderboardView } from './views/LeaderboardView';
 import { ProfileView } from './views/ProfileView';
+import { AdminView } from './views/AdminView';
 import { FanmahalLogo } from './components/FanmahalLogo';
-import { Crown, Sparkles, ShieldCheck, Heart, Tv, ExternalLink } from 'lucide-react';
+import { Crown, Sparkles, ShieldCheck, Heart, Tv, ExternalLink, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 function MainLayout() {
-  const [currentView, setCurrentView] = useState<'predictions' | 'leaderboard' | 'profile'>('predictions');
+  const getInitialView = (): 'predictions' | 'leaderboard' | 'profile' | 'admin' => {
+    if (typeof window === 'undefined') return 'predictions';
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    const search = window.location.search.toLowerCase();
+    if (path.includes('/moderator') || hash.includes('moderator') || search.includes('route=moderator')) {
+      return 'admin';
+    }
+    if (path.includes('/leaderboard') || hash.includes('leaderboard')) return 'leaderboard';
+    if (path.includes('/profile') || hash.includes('profile')) return 'profile';
+    return 'predictions';
+  };
+
+  const [currentView, setCurrentView] = useState<'predictions' | 'leaderboard' | 'profile' | 'admin'>(getInitialView);
+  const { user } = useGame();
+
+  React.useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      if (path.includes('/moderator') || hash.includes('moderator')) {
+        setCurrentView('admin');
+      } else if (path.includes('/leaderboard') || hash.includes('leaderboard')) {
+        setCurrentView('leaderboard');
+      } else if (path.includes('/profile') || hash.includes('profile')) {
+        setCurrentView('profile');
+      } else {
+        setCurrentView('predictions');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleNavigate = (view: 'predictions' | 'leaderboard' | 'profile' | 'admin') => {
+    setCurrentView(view);
+    try {
+      if (view === 'admin') {
+        window.history.pushState({}, '', '/moderator');
+      } else if (view === 'predictions') {
+        window.history.pushState({}, '', '/');
+      } else {
+        window.history.pushState({}, '', `/${view}`);
+      }
+    } catch {
+      // Ignore in iframe sandboxes
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#110125] text-purple-100 font-sans selection:bg-[#FF1E94] selection:text-white flex flex-col relative overflow-hidden">
@@ -26,14 +75,25 @@ function MainLayout() {
       {/* Top Announcement Banner */}
       <TopAnnouncementBanner />
 
+      {/* Account Restricted Banner if Banned */}
+      {user?.isBanned && (
+        <div className="bg-rose-950 border-b border-rose-500 text-rose-200 px-4 py-3 text-xs font-bold text-center flex items-center justify-center gap-2 relative z-50">
+          <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
+          <span>
+            <strong>Account Restricted:</strong> {user.banReason || 'Your account is restricted from placing predictions due to Terms of Service violation.'}
+          </span>
+        </div>
+      )}
+
       {/* Top Navbar */}
-      <Navbar currentView={currentView} setCurrentView={setCurrentView} />
+      <Navbar currentView={currentView} setCurrentView={handleNavigate} />
 
       {/* Main View Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 relative z-10">
         {currentView === 'predictions' && <HomeView />}
         {currentView === 'leaderboard' && <LeaderboardView />}
         {currentView === 'profile' && <ProfileView />}
+        {currentView === 'admin' && <AdminView />}
       </main>
 
       {/* Global Modals */}
@@ -88,3 +148,4 @@ export default function App() {
     </GameProvider>
   );
 }
+

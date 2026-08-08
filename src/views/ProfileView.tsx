@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
-import { User, Coins, Crown, Sparkles, Tv, ShieldCheck, RefreshCw, CheckCircle2, Clock, XCircle, Users, Edit3, Save, Gift, AlertTriangle, ExternalLink, Copy, Check, Share2 } from 'lucide-react';
+import { User, Coins, Crown, Sparkles, Tv, ShieldCheck, RefreshCw, CheckCircle2, Clock, XCircle, Users, Edit3, Save, Gift, AlertTriangle, ExternalLink, Copy, Check, Share2, LogOut } from 'lucide-react';
 import { PRESET_AVATARS, PRESET_BADGES } from '../data/mockData';
 import { calculateRaffleTickets } from '../utils/raffle';
 
@@ -16,6 +16,7 @@ export const ProfileView: React.FC = () => {
     setShowRaffleModal,
     resetDemoData,
     setShowAuthModal,
+    logout,
   } = useGame();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -121,6 +122,16 @@ export const ProfileView: React.FC = () => {
             >
               <Edit3 className="w-3.5 h-3.5" />
               <span>{isEditing ? 'Cancel Edit' : 'Edit Profile'}</span>
+            </button>
+
+            <button
+              onClick={logout}
+              id="logout-btn"
+              className="px-4 py-2 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 rounded-xl text-xs font-bold text-rose-300 flex items-center gap-1.5 transition shadow"
+              title="Sign out of your account"
+            >
+              <LogOut className="w-3.5 h-3.5 text-rose-400" />
+              <span>Sign Out</span>
             </button>
           </div>
         </div>

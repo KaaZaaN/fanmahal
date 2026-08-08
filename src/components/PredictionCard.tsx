@@ -53,12 +53,17 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ question }) => {
     'Season Long': 'bg-yellow-400/20 text-yellow-200 border-yellow-400/40 font-bold',
   };
 
+  const isAutoLocked = question.deadlineTimestamp > 0 && Date.now() >= question.deadlineTimestamp;
+  const isLocked = question.isLockedManual || isAutoLocked;
+
   return (
     <div
       id={`prediction-card-${question.id}`}
       className={`relative rounded-3xl p-5 sm:p-6 transition-all border-2 shadow-2xl ${
         question.resolved
           ? 'bg-black/90 border-purple-800/60 opacity-95 shadow-purple-950/40'
+          : isLocked
+          ? 'bg-gradient-to-b from-[#18012e] to-[#0a0016] border-amber-500/50 shadow-xl'
           : userPred
           ? 'bg-gradient-to-b from-[#15012a] via-[#0b0018] to-black border-[#FF1E94] shadow-2xl shadow-[#FF1E94]/20'
           : 'bg-gradient-to-b from-[#0e0222] via-[#070014] to-black border-purple-600/60 hover:border-[#FF1E94]/80 shadow-2xl shadow-purple-950/80'
@@ -77,6 +82,11 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ question }) => {
           {question.episodeName && (
             <span className="text-[11px] text-purple-300/70 font-medium hidden sm:inline">
               • {question.episodeName}
+            </span>
+          )}
+          {isLocked && !question.resolved && (
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 flex items-center gap-1">
+              🔒 CLOSED FOR PREDICTIONS
             </span>
           )}
         </div>

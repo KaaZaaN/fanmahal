@@ -1,6 +1,5 @@
 import React from 'react';
 import { Crown, Sparkles } from 'lucide-react';
-import { useGame } from '../context/GameContext';
 import officialLogoImg from '../assets/images/fanmahal_actual_logo_1785989885640.jpg';
 
 interface FanmahalLogoProps {
@@ -14,8 +13,7 @@ export const FanmahalLogo: React.FC<FanmahalLogoProps> = ({
   showSubtitle = true,
   showIgHandle = false,
 }) => {
-  const { customLogoUrl } = useGame();
-  const logoSrc = customLogoUrl || officialLogoImg;
+  const logoSrc = officialLogoImg;
 
   const iconSizes = {
     sm: 'w-9 h-9 rounded-xl',

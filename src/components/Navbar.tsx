@@ -1,41 +1,22 @@
-import React, { useRef } from 'react';
-import { Crown, Coins, Sparkles, User, Tv, Trophy, Zap, Plus, ShieldAlert, Gift, Upload, Image, RotateCcw } from 'lucide-react';
+import React from 'react';
+import { Crown, Coins, Sparkles, User, Tv, Trophy, Zap, Plus, ShieldAlert, Gift, LogOut } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { FanmahalLogo } from './FanmahalLogo';
 import { calculateRaffleTickets } from '../utils/raffle';
 
 interface NavbarProps {
-  currentView: 'predictions' | 'leaderboard' | 'profile';
-  setCurrentView: (view: 'predictions' | 'leaderboard' | 'profile') => void;
+  currentView: 'predictions' | 'leaderboard' | 'profile' | 'admin';
+  setCurrentView: (view: 'predictions' | 'leaderboard' | 'profile' | 'admin') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) => {
-  const { user, setShowAuthModal, setShowAdModal, setShowSimulatorModal, setShowRaffleModal, customLogoUrl, setCustomLogoUrl } = useGame();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File size exceeds 5MB. Please select a smaller logo image.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        if (result) {
-          setCustomLogoUrl(result);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const { user, setShowAuthModal, setShowAdModal, setShowSimulatorModal, setShowRaffleModal, logout } = useGame();
 
   return (
     <header className="sticky top-0 z-40 bg-[#110125]/95 backdrop-blur-md border-b border-[#FF1E94]/20 shadow-2xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          {/* Brand / Logo + Upload Custom Logo button */}
+          {/* Brand / Logo */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentView('predictions')}
@@ -44,40 +25,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
             >
               <FanmahalLogo size="md" showSubtitle={true} showIgHandle={false} />
             </button>
-
-            {/* Hidden File Input for Custom Logo */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept="image/*"
-              onChange={handleLogoFileUpload}
-              className="hidden"
-              id="custom-logo-file-input"
-            />
-
-            {/* Quick Logo Upload Button */}
-            <div className="hidden lg:flex items-center gap-1 ml-1">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                id="upload-custom-logo-btn"
-                className="p-1.5 bg-[#1C023E] hover:bg-purple-800/60 text-purple-300 hover:text-amber-300 rounded-lg border border-purple-700/50 transition flex items-center gap-1 text-[10px] font-semibold"
-                title="Upload your own custom logo file (PNG/JPG)"
-              >
-                <Upload className="w-3 h-3 text-amber-400" />
-                <span>Upload Logo</span>
-              </button>
-
-              {customLogoUrl && (
-                <button
-                  onClick={() => setCustomLogoUrl(null)}
-                  id="reset-custom-logo-btn"
-                  className="p-1.5 bg-[#1C023E] hover:bg-rose-900/60 text-rose-300 rounded-lg border border-rose-700/40 transition text-[10px]"
-                  title="Reset to default Fanmahal logo"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                </button>
-              )}
-            </div>
           </div>
 
           {/* Desktop Navigation Tabs */}
@@ -120,6 +67,22 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
               <User className="w-3.5 h-3.5" />
               Profile & Wallet
             </button>
+
+            {/* Admin/Moderator Studio Button (Visible to authorized staff or when visiting /moderator) */}
+            {(user?.isAdmin || currentView === 'admin') && (
+              <button
+                onClick={() => setCurrentView('admin')}
+                id="nav-admin-btn"
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition ${
+                  currentView === 'admin'
+                    ? 'bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/30'
+                    : 'bg-amber-400/20 text-amber-300 border border-amber-400/40 hover:bg-amber-400/30'
+                }`}
+              >
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                <span>Moderator Panel</span>
+              </button>
+            )}
           </nav>
 
           {/* Right Section: Currencies & User */}
@@ -175,6 +138,16 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
                   <span className="hidden lg:inline text-xs font-semibold text-purple-100 max-w-[100px] truncate">
                     {user.username}
                   </span>
+                </button>
+
+                {/* Navbar Logout Button */}
+                <button
+                  onClick={logout}
+                  id="navbar-logout-btn"
+                  className="p-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-xl text-rose-300 transition"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-4 h-4 text-rose-400" />
                 </button>
               </>
             ) : (
@@ -245,6 +218,19 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
           <User className="w-5 h-5" />
           <span>Profile</span>
         </button>
+
+        {(user?.isAdmin || currentView === 'admin') && (
+          <button
+            onClick={() => setCurrentView('admin')}
+            id="mobile-nav-admin"
+            className={`flex flex-col items-center gap-1 text-[11px] font-extrabold transition ${
+              currentView === 'admin' ? 'text-amber-400' : 'text-amber-300/70 hover:text-amber-300'
+            }`}
+          >
+            <ShieldAlert className="w-5 h-5 text-amber-400" />
+            <span>Moderator</span>
+          </button>
+        )}
       </div>
     </header>
   );

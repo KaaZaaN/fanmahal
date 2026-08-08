@@ -21,6 +21,9 @@ export interface Question {
   winningOptionId?: string;
   resolutionNote?: string;
   episodeName?: string;
+  isLockedManual?: boolean;
+  isRefunded?: boolean;
+  createdAt?: number;
 }
 
 export interface UserPrediction {
@@ -29,32 +32,77 @@ export interface UserPrediction {
   coinsStaked: number;
   potentialCrowns: number;
   timestamp: number;
-  status: 'PENDING' | 'WON' | 'LOST';
+  status: 'PENDING' | 'WON' | 'LOST' | 'REFUNDED';
   crownsEarned?: number;
 }
 
 export type RealityShow = 'BIGG_BOSS' | 'ROADIES' | 'SPLITSVILLA';
 
+export type UserRole = 'SUPER_ADMIN' | 'MODERATOR' | 'USER';
+
+export interface StaffPermissions {
+  canManageQuestions: boolean;
+  canSettlePayouts: boolean;
+  canBanUsers: boolean;
+  canManageStaff: boolean;
+  canBroadcast: boolean;
+  canManageRaffle: boolean;
+}
+
+export interface StaffMember {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  permissions: StaffPermissions;
+  addedBy: string;
+  dateAdded: string;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
   username: string; // e.g., @BiggBossRaja
-  instagramHandle?: string; // e.g., @thefanmahal or @salman_fan_1 (mandatory for prize delivery)
-  phoneNumber?: string; // Optional for now, mandatory in Phase 2 for prize delivery
+  instagramHandle?: string; // e.g., @thefanmahal
+  phoneNumber?: string;
   avatar: string;
   titleBadge: string;
   fanCoins: number;
   crowns: number; // Season total crowns
-  monthlyCrowns: number; // Monthly crowns for raffle tickets (resets 1st of each month)
+  monthlyCrowns: number; // Monthly crowns for raffle tickets
   weeklyRefreshAvailable: boolean;
   weeklyCoinsClaimedDate?: string;
   adsWatchedThisWeek: number; // max 5
   adsWatchedToday?: number; // max daily limit
   lastAdResetDate?: string; // YYYY-MM-DD in IST timezone
   referralsThisWeek: number; // max 5
-  totalReferrals?: number; // total friends referred
+  totalReferrals?: number;
   referralCode: string;
   joinedDate: string;
+  isAdmin?: boolean;
+  role?: UserRole;
+  permissions?: StaffPermissions;
+  isBanned?: boolean;
+  banReason?: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  message: string;
+  type: 'INFO' | 'ALERT' | 'CELEBRATION';
+  active: boolean;
+  timestamp: number;
+  linkUrl?: string;
+}
+
+export interface YouTubeRaffleNotice {
+  id: string;
+  title: string;
+  scheduledDate: string;
+  youtubeUrl: string;
+  note?: string;
+  active: boolean;
 }
 
 export interface LeaderboardEntry {
@@ -68,6 +116,7 @@ export interface LeaderboardEntry {
   totalPredictions: number;
   winRate: number;
   isCurrentUser?: boolean;
+  isBanned?: boolean;
 }
 
 export interface PrizeHamper {
@@ -78,3 +127,4 @@ export interface PrizeHamper {
   image: string;
   color: string;
 }
+

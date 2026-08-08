@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Mail, KeyRound, User, Sparkles, CheckCircle2, Crown, ShieldCheck, ArrowRight } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { PRESET_AVATARS, PRESET_BADGES } from '../data/mockData';
-import { auth, googleProvider, signInWithPopup } from '../lib/firebase';
+import { auth, googleProvider, signInWithRedirect, signInWithPopup } from '../lib/firebase';
 
 export const AuthModal: React.FC = () => {
   const { showAuthModal, setShowAuthModal, login } = useGame();
@@ -24,22 +24,26 @@ export const AuthModal: React.FC = () => {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const googleUser = result.user;
-      if (googleUser.email) {
-        setEmail(googleUser.email);
-        const handlePart = (googleUser.displayName || googleUser.email.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '');
-        setUsername(`@${handlePart || 'BiggBossFan'}`);
-        setInstagramHandle(`@${handlePart || 'BiggBossFan'}_ig`);
+      // Primary: redirect method (bypasses popup blockers and iframe restrictions)
+      await signInWithRedirect(auth, googleProvider);
+    } catch (err: any) {
+      console.warn('Google sign-in redirect error, trying popup fallback:', err);
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        if (result.user.email) {
+          const handlePart = (result.user.displayName || result.user.email.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '');
+          setEmail(result.user.email);
+          setUsername(`@${handlePart || 'BiggBossFan'}`);
+          setInstagramHandle(`@${handlePart || 'BiggBossFan'}_ig`);
+          setStep('PROFILE');
+        }
+      } catch (popupErr: any) {
+        console.warn('Popup fallback also failed:', popupErr);
+        setEmail('google_user@gmail.com');
+        setUsername('@GoogleFan');
+        setInstagramHandle('@GoogleFan_ig');
         setStep('PROFILE');
       }
-    } catch (err: any) {
-      console.warn('Google sign-in popup closed or fallback to profile:', err);
-      // Fallback for popup blocked/closed in iframe environments
-      setEmail('google_user@gmail.com');
-      setUsername('@GoogleFan');
-      setInstagramHandle('@GoogleFan_ig');
-      setStep('PROFILE');
     } finally {
       setIsGoogleLoading(false);
     }

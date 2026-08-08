@@ -13,7 +13,7 @@ import {
 } from '../types';
 import { INITIAL_QUESTIONS, MOCK_LEADERBOARD } from '../data/mockData';
 import confetti from 'canvas-confetti';
-import { db, auth, signOut } from '../lib/firebase';
+import { db, auth, signOut, getRedirectResult } from '../lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 
 export const FOUNDER_EMAIL = 'prithvirajkz94@gmail.com';
@@ -251,6 +251,23 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY_STAFF, JSON.stringify(staffMembers));
   }, [staffMembers]);
+
+  useEffect(() => {
+    // Process Google redirect result if returning from Google Auth page
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result && result.user && result.user.email) {
+          const googleUser = result.user;
+          const handlePart = (googleUser.displayName || googleUser.email.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '');
+          const username = `@${handlePart || 'BiggBossFan'}`;
+          const instagramHandle = `@${handlePart || 'BiggBossFan'}_ig`;
+          login(googleUser.email, username, '👑', 'Reality TV Oracle', instagramHandle, '');
+        }
+      })
+      .catch((error) => {
+        console.warn('Google Redirect Sign-In error:', error);
+      });
+  }, []);
 
   const [questions, setQuestions] = useState<Question[]>(() => {
     try {

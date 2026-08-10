@@ -143,39 +143,6 @@ export const AuthModal: React.FC = () => {
           </p>
         </div>
 
-        {/* Quick Demo Switcher Panel */}
-        <div className="mb-6 p-3 rounded-2xl bg-[#130129] border border-amber-400/20 text-center">
-          <p className="text-[11px] font-semibold text-amber-300/90 uppercase tracking-wider mb-2 flex items-center justify-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            Quick Demo Sign-In (One Click)
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => handleQuickDemoLogin('@MasterPredictor', 'master@fanmahal.in', '👑', 'Bigg Boss Oracle')}
-              id="demo-user-1-btn"
-              className="py-1.5 px-2 bg-gradient-to-r from-purple-900/80 to-purple-800/80 hover:border-amber-400 border border-purple-600/40 rounded-xl text-left transition text-xs flex items-center gap-2"
-            >
-              <span className="text-base">👑</span>
-              <div className="truncate">
-                <p className="font-bold text-amber-200 truncate">@MasterPredictor</p>
-                <p className="text-[10px] text-purple-300/70">Rank #1 • 18,450 Crowns</p>
-              </div>
-            </button>
-
-            <button
-              onClick={() => handleQuickDemoLogin('@BiggBossRaja', 'raja@fanmahal.in', '🦁', 'Weekend Ka Vaar King')}
-              id="demo-user-2-btn"
-              className="py-1.5 px-2 bg-gradient-to-r from-purple-900/80 to-purple-800/80 hover:border-[#FF1E94] border border-purple-600/40 rounded-xl text-left transition text-xs flex items-center gap-2"
-            >
-              <span className="text-base">🦁</span>
-              <div className="truncate">
-                <p className="font-bold text-purple-200 truncate">@BiggBossRaja</p>
-                <p className="text-[10px] text-purple-300/70">800 Fan Coins • Ready</p>
-              </div>
-            </button>
-          </div>
-        </div>
-
         {/* Google One-Click Sign-In */}
         <div className="mb-4">
           <button

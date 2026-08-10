@@ -16,7 +16,8 @@ import confetti from 'canvas-confetti';
 import { db, auth, signOut, getRedirectResult } from '../lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 
-export const FOUNDER_EMAIL = 'prithvirajkz94@gmail.com';
+export const FOUNDER_EMAIL = 'prithvi@fanmahal.com';
+export const ALT_FOUNDER_EMAIL = 'prithvirajkz94@gmail.com';
 
 export const SUPER_PERMISSIONS: StaffPermissions = {
   canManageQuestions: true,
@@ -97,6 +98,7 @@ interface GameContextType {
   addAnnouncement: (announcement: Omit<Announcement, 'id' | 'timestamp'>) => void;
   toggleAnnouncement: (id: string) => void;
   deleteAnnouncement: (id: string) => void;
+  restoreDefaultBanner: () => void;
   
   // YouTube Raffle Stream Notice
   youtubeRaffleNotice: YouTubeRaffleNotice | null;
@@ -126,7 +128,7 @@ const DEFAULT_USER: UserProfile = {
   instagramHandle: '@prithvirajkz94',
   phoneNumber: '+91 98765 43210',
   avatar: '👑',
-  titleBadge: 'Founder & Chairman',
+  titleBadge: 'Founder',
   fanCoins: 10000,
   crowns: 50000,
   monthlyCrowns: 25000,
@@ -206,7 +208,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkUserStaffAccess = (emailToCheck: string) => {
     const norm = emailToCheck.trim().toLowerCase();
-    if (norm === FOUNDER_EMAIL.toLowerCase()) {
+    if (norm === FOUNDER_EMAIL.toLowerCase() || norm === ALT_FOUNDER_EMAIL.toLowerCase()) {
       return {
         isAuthorized: true,
         role: 'SUPER_ADMIN' as UserRole,
@@ -242,9 +244,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           permissions: access.permissions,
         };
       }
-      return DEFAULT_USER;
+      return null;
     } catch {
-      return DEFAULT_USER;
+      return null;
     }
   });
 
@@ -878,6 +880,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAnnouncements((prev) => prev.filter((a) => a.id !== id));
   };
 
+  const restoreDefaultBanner = () => {
+    setAnnouncements((prev) => prev.map((a) => ({ ...a, active: false })));
+  };
+
 
   const cancelPrediction = (questionId: string) => {
     const existingPred = predictions[questionId];
@@ -1154,6 +1160,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addAnnouncement,
         toggleAnnouncement,
         deleteAnnouncement,
+        restoreDefaultBanner,
         youtubeRaffleNotice,
         setYoutubeRaffleNotice,
         resetDemoData,

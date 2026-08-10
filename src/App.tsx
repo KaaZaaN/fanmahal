@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { GameProvider, useGame } from './context/GameContext';
+import React, { useState, useEffect } from 'react';
+import { GameProvider, useGame, FOUNDER_EMAIL, ALT_FOUNDER_EMAIL } from './context/GameContext';
 import { TopAnnouncementBanner } from './components/TopAnnouncementBanner';
 import { Navbar } from './components/Navbar';
 import { AuthModal } from './components/AuthModal';
@@ -13,10 +13,10 @@ import { ProfileView } from './views/ProfileView';
 import { AdminView } from './views/AdminView';
 import { PrivacyView } from './views/PrivacyView';
 import { TermsView } from './views/TermsView';
-import { FanmahalLogo } from './components/FanmahalLogo';
-import { Crown, Sparkles, ShieldCheck, Heart, Tv, ExternalLink, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { ComingSoonView } from './views/ComingSoonView';
+import { Lock } from 'lucide-react';
 
-type ViewType = 'predictions' | 'leaderboard' | 'profile' | 'admin' | 'privacy' | 'terms';
+type ViewType = 'predictions' | 'leaderboard' | 'profile' | 'admin' | 'privacy' | 'terms' | 'coming_soon';
 
 function MainLayout() {
   const getInitialView = (): ViewType => {
@@ -27,17 +27,17 @@ function MainLayout() {
     if (path.includes('/moderator') || hash.includes('moderator') || search.includes('route=moderator')) {
       return 'admin';
     }
-    if (path.includes('/leaderboard') || hash.includes('leaderboard')) return 'leaderboard';
-    if (path.includes('/profile') || hash.includes('profile')) return 'profile';
     if (path.includes('/privacy') || hash.includes('privacy')) return 'privacy';
     if (path.includes('/terms') || hash.includes('terms')) return 'terms';
+    if (path.includes('/leaderboard') || hash.includes('leaderboard')) return 'leaderboard';
+    if (path.includes('/profile') || hash.includes('profile')) return 'profile';
     return 'predictions';
   };
 
   const [currentView, setCurrentView] = useState<ViewType>(getInitialView);
-  const { user } = useGame();
+  const { user, setShowAuthModal } = useGame();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
@@ -76,12 +76,70 @@ function MainLayout() {
     }
   };
 
+  const isFounderUser = Boolean(
+    user && (
+      user.email?.trim().toLowerCase() === FOUNDER_EMAIL.toLowerCase() ||
+      user.email?.trim().toLowerCase() === ALT_FOUNDER_EMAIL.toLowerCase() ||
+      user.role === 'SUPER_ADMIN' ||
+      user.isAdmin
+    )
+  );
+
+  // ROUTE EXCEPTIONS:
+  // 1. Direct /terms page
+  if (currentView === 'terms') {
+    return <TermsView onNavigateBack={() => handleNavigate('predictions')} />;
+  }
+
+  // 2. Direct /privacy page
+  if (currentView === 'privacy') {
+    return <PrivacyView onNavigateBack={() => handleNavigate('predictions')} />;
+  }
+
+  // 3. Direct /moderator page
+  if (currentView === 'admin') {
+    return (
+      <div className="min-h-screen bg-[#110125] text-purple-100 font-sans selection:bg-[#FF1E94] selection:text-white flex flex-col relative overflow-hidden">
+        <TopAnnouncementBanner />
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 relative z-10">
+          <AdminView />
+        </main>
+        <AuthModal />
+      </div>
+    );
+  }
+
+  // PUBLIC VISITORS -> Show Coming Soon Page unless Founder is Authenticated
+  if (!isFounderUser) {
+    return (
+      <>
+        <ComingSoonView
+          onNavigateTerms={() => handleNavigate('terms')}
+          onNavigatePrivacy={() => handleNavigate('privacy')}
+          onFounderBypass={() => {
+            setShowAuthModal(true);
+          }}
+        />
+        <AuthModal />
+      </>
+    );
+  }
+
+  // FOUNDER / BYPASSED ACCESS -> Render Full App
   return (
     <div className="min-h-screen bg-[#110125] text-purple-100 font-sans selection:bg-[#FF1E94] selection:text-white flex flex-col relative overflow-hidden">
-      {/* Immersive Background Radial Glowing Gradients */}
+      {/* Background Radial Glowing Gradients */}
       <div className="absolute top-20 -left-40 w-96 h-96 bg-[#31056C]/25 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/3 -right-40 w-96 h-96 bg-[#FF1E94]/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-80 h-80 bg-[#22034D]/60 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Founder Live Testing Watermark Badge */}
+      <div className="bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 text-slate-950 px-4 py-1.5 text-xs font-black text-center flex items-center justify-center gap-2 relative z-50 shadow-lg">
+        <Lock className="w-3.5 h-3.5 text-slate-950" />
+        <span>
+          FOUNDER PREVIEW MODE: Full App Active for Founder Prithvi (@KaaZaaN). Regular visitors see the Coming Soon landing page.
+        </span>
+      </div>
 
       {/* Top Announcement Banner */}
       <TopAnnouncementBanner />
@@ -104,9 +162,6 @@ function MainLayout() {
         {currentView === 'predictions' && <HomeView />}
         {currentView === 'leaderboard' && <LeaderboardView />}
         {currentView === 'profile' && <ProfileView />}
-        {currentView === 'admin' && <AdminView />}
-        {currentView === 'privacy' && <PrivacyView onNavigateBack={() => handleNavigate('predictions')} />}
-        {currentView === 'terms' && <TermsView onNavigateBack={() => handleNavigate('predictions')} />}
       </main>
 
       {/* Global Modals */}

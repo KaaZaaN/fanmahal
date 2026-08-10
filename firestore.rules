@@ -8,5 +8,9 @@ service cloud.firestore {
       allow read, create: if request.auth != null;
       allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
+    match /waitlist/{entryId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
   }
 }

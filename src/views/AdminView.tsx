@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGame, FOUNDER_EMAIL } from '../context/GameContext';
 import { Question, Category, Option, Announcement, UserRole, StaffPermissions } from '../types';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 import {
   ShieldAlert,
   PlusCircle,
@@ -31,7 +33,9 @@ import {
   Trash2,
   UserPlus,
   Key,
-  LogIn
+  LogIn,
+  Mail,
+  Download
 } from 'lucide-react';
 
 const CATEGORIES: Category[] = [
@@ -61,6 +65,7 @@ export const AdminView: React.FC = () => {
     addAnnouncement,
     toggleAnnouncement,
     deleteAnnouncement,
+    restoreDefaultBanner,
     youtubeRaffleNotice,
     setYoutubeRaffleNotice,
     leaderboard,
@@ -74,7 +79,57 @@ export const AdminView: React.FC = () => {
   const userAccess = user?.email ? checkUserStaffAccess(user.email) : { isAuthorized: false, role: 'USER' };
   const isAuthorizedStaff = user?.isAdmin && userAccess.isAuthorized;
 
-  const [activeTab, setActiveTab] = useState<'questions' | 'staff' | 'users' | 'announcements' | 'youtube'>('questions');
+  const [activeTab, setActiveTab] = useState<'questions' | 'staff' | 'users' | 'announcements' | 'youtube' | 'waitlist'>('questions');
+
+  // Waitlist Signups State from Firestore
+  const [waitlistEntries, setWaitlistEntries] = useState<Array<{ id: string; email: string; createdAt: string; source?: string }>>([]);
+
+  useEffect(() => {
+    let unsubscribe = () => {};
+    try {
+      const q = collection(db, 'waitlist');
+      unsubscribe = onSnapshot(q, (snapshot) => {
+        const items: Array<{ id: string; email: string; createdAt: string; source?: string }> = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          items.push({
+            id: doc.id,
+            email: data.email || '',
+            createdAt: data.createdAt || new Date().toISOString(),
+            source: data.source || 'coming_soon',
+          });
+        });
+        items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setWaitlistEntries(items);
+      });
+    } catch (err) {
+      console.warn('Error fetching waitlist entries in AdminView:', err);
+    }
+    return () => unsubscribe();
+  }, []);
+
+  const exportWaitlistCSV = () => {
+    if (waitlistEntries.length === 0) {
+      alert('No waitlist signups available to export yet.');
+      return;
+    }
+    const headers = ['Email', 'Created At (ISO)', 'Source'];
+    const rows = waitlistEntries.map((e) => [
+      `"${e.email.replace(/"/g, '""')}"`,
+      `"${e.createdAt}"`,
+      `"${e.source || ''}"`,
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `fanmahal_waitlist_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Moderator Login Screen State
   const [authEmailInput, setAuthEmailInput] = useState('');
@@ -521,6 +576,18 @@ export const AdminView: React.FC = () => {
         >
           <Youtube className="w-4 h-4 text-rose-400" />
           <span>YouTube Raffle Notice</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('waitlist')}
+          className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition ${
+            activeTab === 'waitlist'
+              ? 'bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/20'
+              : 'bg-[#1C023E] text-purple-300 hover:bg-purple-900/40'
+          }`}
+        >
+          <Mail className="w-4 h-4 text-amber-300" />
+          <span>VIP Waitlist Signups ({waitlistEntries.length})</span>
         </button>
       </div>
 
@@ -1293,86 +1360,268 @@ export const AdminView: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 3: BROADCAST ANNOUNCEMENTS */}
+      {/* TAB 3: BROADCAST ANNOUNCEMENTS & BANNER MANAGEMENT */}
       {activeTab === 'announcements' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-5 bg-[#1C023E] border border-purple-800/60 rounded-2xl p-5 shadow-xl space-y-4 text-xs">
-            <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-purple-800/60 pb-3">
-              <Megaphone className="w-5 h-5 text-amber-400" />
-              <span>Publish Top Announcement Banner</span>
-            </h2>
-
-            <form onSubmit={handleCreateAnnouncement} className="space-y-3">
-              <div>
-                <label className="block text-purple-200 font-bold mb-1">Banner Headline</label>
-                <input
-                  type="text"
-                  value={annTitle}
-                  onChange={(e) => setAnnTitle(e.target.value)}
-                  placeholder="e.g. ⚡ Midnight Elimination Predictions are LIVE!"
-                  className="w-full bg-[#110125] text-white border border-purple-700/60 rounded-xl px-3 py-2"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-purple-200 font-bold mb-1">Message Description</label>
-                <textarea
-                  value={annMsg}
-                  onChange={(e) => setAnnMsg(e.target.value)}
-                  placeholder="e.g. Stake your Fan Coins now before Friday 10 PM IST broadcast."
-                  className="w-full bg-[#110125] text-purple-200 border border-purple-700/60 rounded-xl px-3 py-2 h-20"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-purple-200 font-bold mb-1">Banner Type</label>
-                <select
-                  value={annType}
-                  onChange={(e) => setAnnType(e.target.value as any)}
-                  className="w-full bg-[#110125] text-amber-300 font-bold border border-purple-700/60 rounded-xl px-3 py-2"
-                >
-                  <option value="INFO">INFO (Purple/Pink)</option>
-                  <option value="ALERT">ALERT (Amber/Red)</option>
-                  <option value="CELEBRATION">CELEBRATION (Pink/Gold)</option>
-                </select>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-3 rounded-xl shadow-lg transition uppercase tracking-wide"
-              >
-                Publish Live Announcement
-              </button>
-            </form>
-          </div>
-
-          <div className="lg:col-span-7 space-y-3">
-            <h2 className="text-lg font-black text-white">Active Announcements ({announcements.length})</h2>
-            {announcements.map((a) => (
-              <div
-                key={a.id}
-                className="bg-[#1C023E] border border-purple-800/60 rounded-xl p-4 flex items-start justify-between gap-3"
-              >
+        <div className="space-y-6">
+          {/* Preset Card 1: Official Default Banner */}
+          <div className="bg-[#1C023E] border border-amber-500/50 rounded-2xl p-5 shadow-2xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-800/60 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 bg-amber-400/20 text-amber-300 border border-amber-400/40 rounded-lg">
+                  <Sparkles className="w-4 h-4" />
+                </span>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-900 text-amber-300">
-                      {a.type}
+                  <h2 className="text-base font-black text-white flex items-center gap-2">
+                    <span>Default Banner (Site-Wide System Preset)</span>
+                    <span className="text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full">
+                      PRESET
                     </span>
-                    <h3 className="font-extrabold text-white text-sm">{a.title}</h3>
-                  </div>
-                  <p className="text-xs text-purple-200/80 mt-1">{a.message}</p>
+                  </h2>
+                  <p className="text-xs text-purple-200/80">
+                    This is the permanent platform banner. It displays automatically whenever no temporary campaign banner is active.
+                  </p>
                 </div>
+              </div>
+
+              {/* Status Indicator & Restore Default Button */}
+              <div className="flex items-center gap-3">
+                {announcements.some((a) => a.active) ? (
+                  <span className="text-[11px] font-bold text-amber-300 bg-amber-900/50 border border-amber-500/40 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>PAUSED (Campaign Banner Active)</span>
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-bold text-emerald-300 bg-emerald-900/50 border border-emerald-500/40 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>CURRENTLY LIVE ON SITE</span>
+                  </span>
+                )}
 
                 <button
-                  onClick={() => deleteAnnouncement(a.id)}
-                  className="p-1.5 text-rose-400 hover:text-rose-300"
+                  type="button"
+                  onClick={() => {
+                    restoreDefaultBanner();
+                    alert('✓ Default Banner restored! The site is now displaying the Default Banner live.');
+                  }}
+                  id="btn-use-default-banner-preset"
+                  className="px-4 py-2 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:opacity-90 text-slate-950 font-black text-xs rounded-xl shadow-lg transition flex items-center gap-1.5 border border-amber-300/50 cursor-pointer"
                 >
-                  <XCircle className="w-5 h-5" />
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Use Default Banner</span>
                 </button>
               </div>
-            ))}
+            </div>
+
+            {/* Default Banner Visual Live Preview */}
+            <div className="bg-gradient-to-r from-[#210245] via-[#850849] via-60% to-[#C2410C] text-white text-xs p-3.5 rounded-xl border border-pink-400/30 shadow-inner relative overflow-hidden">
+              <div className="flex flex-wrap items-center justify-center text-center gap-x-3 gap-y-1.5 text-[11px] font-semibold tracking-wide">
+                <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 px-3 py-0.5 rounded-full font-black uppercase tracking-wider text-[10px] shadow-md">
+                  <Sparkles className="w-3 h-3 text-slate-950" />
+                  100% Free-to-Play
+                </span>
+                <span className="text-white font-bold">India's First Reality TV Prediction Platform</span>
+                <span className="text-amber-300/60 font-bold">•</span>
+                <span className="inline-flex items-center gap-1 text-amber-200 font-bold">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-300" />
+                  Zero Money Staked
+                </span>
+                <span className="text-amber-300/60 font-bold">•</span>
+                <span className="inline-flex items-center gap-1 text-pink-100 font-bold">
+                  <Award className="w-3.5 h-3.5 text-pink-300" />
+                  Real Hampers, Vouchers & Prizes
+                </span>
+                <span className="text-amber-300/60 font-bold">•</span>
+                <div className="inline-flex items-center gap-1.5">
+                  <span className="text-purple-200 font-medium">Official IG:</span>
+                  <span className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-600 via-pink-500 to-amber-500 text-white font-extrabold px-2.5 py-0.5 rounded-md text-[10px]">
+                    @thefanmahal
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Form: Create Custom Campaign Banner */}
+            <div className="lg:col-span-5 bg-[#1C023E] border border-purple-800/60 rounded-2xl p-5 shadow-xl space-y-4 text-xs">
+              <div className="flex items-center justify-between border-b border-purple-800/60 pb-3">
+                <h2 className="text-base font-black text-white flex items-center gap-2">
+                  <Megaphone className="w-4 h-4 text-amber-400" />
+                  <span>Create Campaign Banner</span>
+                </h2>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    restoreDefaultBanner();
+                    alert('✓ Swapped live banner back to Default Banner!');
+                  }}
+                  className="text-[11px] text-amber-300 hover:underline font-bold flex items-center gap-1"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Restore Default</span>
+                </button>
+              </div>
+
+              <p className="text-[11px] text-purple-300/70 leading-relaxed">
+                Publish a temporary campaign announcement (e.g. Special Episode Live, Elimination Alert). Activating a campaign banner temporarily replaces the Default Banner on the live site.
+              </p>
+
+              <form onSubmit={handleCreateAnnouncement} className="space-y-3">
+                <div>
+                  <label className="block text-purple-200 font-bold mb-1">Banner Headline *</label>
+                  <input
+                    type="text"
+                    value={annTitle}
+                    onChange={(e) => setAnnTitle(e.target.value)}
+                    placeholder="e.g. ⚡ Midnight Elimination Predictions are LIVE!"
+                    className="w-full bg-[#110125] text-white border border-purple-700/60 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-400"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-purple-200 font-bold mb-1">Message Description *</label>
+                  <textarea
+                    value={annMsg}
+                    onChange={(e) => setAnnMsg(e.target.value)}
+                    placeholder="e.g. Stake your Fan Coins now before Friday 10 PM IST broadcast."
+                    className="w-full bg-[#110125] text-purple-200 border border-purple-700/60 rounded-xl px-3 py-2 h-20 focus:outline-none focus:border-amber-400"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-purple-200 font-bold mb-1">Banner Type</label>
+                    <select
+                      value={annType}
+                      onChange={(e) => setAnnType(e.target.value as any)}
+                      className="w-full bg-[#110125] text-amber-300 font-bold border border-purple-700/60 rounded-xl px-3 py-2"
+                    >
+                      <option value="INFO">INFO (Purple/Pink)</option>
+                      <option value="ALERT">ALERT (Amber/Red)</option>
+                      <option value="CELEBRATION">CELEBRATION (Pink/Gold)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-purple-200 font-bold mb-1">Link URL (Optional)</label>
+                    <input
+                      type="url"
+                      value={annLink}
+                      onChange={(e) => setAnnLink(e.target.value)}
+                      placeholder="https://instagram.com/thefanmahal"
+                      className="w-full bg-[#110125] text-purple-200 border border-purple-700/60 rounded-xl px-3 py-2 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-3 rounded-xl shadow-lg transition uppercase tracking-wide cursor-pointer text-xs"
+                  >
+                    Publish & Activate Campaign Banner
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      restoreDefaultBanner();
+                      alert('✓ Default Banner activated live site-wide!');
+                    }}
+                    title="Instantly restore the default platform banner"
+                    className="px-3.5 py-3 bg-purple-900/60 hover:bg-purple-800 text-amber-300 border border-purple-500/40 rounded-xl font-bold transition text-xs flex items-center gap-1 cursor-pointer"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Use Default</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Campaign Banners List */}
+            <div className="lg:col-span-7 space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-black text-white">
+                  Temporary Campaign Banners ({announcements.length})
+                </h2>
+                {announcements.length > 0 && (
+                  <button
+                    onClick={() => {
+                      restoreDefaultBanner();
+                      alert('✓ Swapped back to Default Banner!');
+                    }}
+                    className="text-xs text-amber-300 hover:underline font-bold flex items-center gap-1"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Deactivate All & Use Default Banner</span>
+                  </button>
+                )}
+              </div>
+
+              {announcements.length === 0 ? (
+                <div className="bg-[#1C023E] border border-purple-800/60 rounded-2xl p-8 text-center text-purple-300/70 space-y-2">
+                  <Megaphone className="w-8 h-8 text-purple-400 mx-auto opacity-50" />
+                  <p className="font-bold text-sm text-purple-200">No Custom Campaign Banners Active</p>
+                  <p className="text-xs max-w-sm mx-auto">
+                    The site is currently running on the <strong>Default Banner</strong> preset. Create a campaign banner above to temporarily override it.
+                  </p>
+                </div>
+              ) : (
+                announcements.map((a) => (
+                  <div
+                    key={a.id}
+                    className={`bg-[#1C023E] border rounded-xl p-4 flex items-start justify-between gap-3 transition ${
+                      a.active ? 'border-amber-500/60 bg-amber-950/10 shadow-lg' : 'border-purple-800/60 opacity-75'
+                    }`}
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-purple-900 text-amber-300 border border-purple-700">
+                          {a.type}
+                        </span>
+                        {a.active ? (
+                          <span className="text-[10px] font-extrabold text-amber-300 bg-amber-400/20 px-2 py-0.5 rounded border border-amber-400/40">
+                            ● ACTIVE OVERRIDE
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-purple-400 bg-purple-900/40 px-2 py-0.5 rounded">
+                            PAUSED
+                          </span>
+                        )}
+                        <h3 className="font-extrabold text-white text-xs">{a.title}</h3>
+                      </div>
+                      <p className="text-xs text-purple-200/80">{a.message}</p>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => {
+                          toggleAnnouncement(a.id);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                          a.active
+                            ? 'bg-amber-400 text-slate-950'
+                            : 'bg-purple-900/60 text-purple-200 border border-purple-700'
+                        }`}
+                      >
+                        {a.active ? 'Active' : 'Activate'}
+                      </button>
+
+                      <button
+                        onClick={() => deleteAnnouncement(a.id)}
+                        className="p-1.5 text-rose-400 hover:text-rose-300 transition"
+                        title="Delete campaign banner"
+                      >
+                        <XCircle className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -1441,6 +1690,75 @@ export const AdminView: React.FC = () => {
               <span>Update YouTube Stream Notice</span>
             </button>
           </form>
+        </div>
+      )}
+
+      {/* TAB: VIP WAITLIST SIGNUPS */}
+      {activeTab === 'waitlist' && (
+        <div className="bg-[#1C023E] border border-purple-800/60 rounded-2xl p-6 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-purple-800/60 pb-4">
+            <div>
+              <h2 className="text-xl font-black text-white flex items-center gap-2">
+                <Mail className="w-6 h-6 text-amber-400" />
+                <span>Pre-Launch VIP Waitlist</span>
+                <span className="text-xs bg-amber-400 text-slate-950 font-black px-2.5 py-0.5 rounded-full">
+                  {waitlistEntries.length} Signups
+                </span>
+              </h2>
+              <p className="text-xs text-purple-300/80 mt-1">
+                Live email subscriptions collected from fanmahal.com coming soon landing page (stored directly in Firestore collection <code className="text-amber-300">waitlist</code>).
+              </p>
+            </div>
+
+            <button
+              onClick={exportWaitlistCSV}
+              className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition flex items-center gap-2 shrink-0 cursor-pointer border border-emerald-400/40"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export Waitlist to CSV</span>
+            </button>
+          </div>
+
+          {waitlistEntries.length === 0 ? (
+            <div className="py-12 text-center text-purple-300/60 space-y-2">
+              <Mail className="w-12 h-12 text-purple-500/40 mx-auto" />
+              <p className="text-sm font-bold text-purple-200">No waitlist signups recorded yet</p>
+              <p className="text-xs">When visitors submit their email on the Coming Soon page, they will appear here live.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-purple-200">
+                <thead className="bg-[#110125] text-amber-300 font-extrabold uppercase border-b border-purple-800">
+                  <tr>
+                    <th className="py-3 px-4">#</th>
+                    <th className="py-3 px-4">Email Address</th>
+                    <th className="py-3 px-4">Date Joined</th>
+                    <th className="py-3 px-4">Source</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-purple-900/40">
+                  {waitlistEntries.map((entry, idx) => (
+                    <tr key={entry.id || idx} className="hover:bg-purple-900/20 transition">
+                      <td className="py-3 px-4 font-bold text-amber-400/80">{idx + 1}</td>
+                      <td className="py-3 px-4 font-mono text-white font-bold">{entry.email}</td>
+                      <td className="py-3 px-4 text-purple-300/80">
+                        {new Date(entry.createdAt).toLocaleString('en-IN', {
+                          timeZone: 'Asia/Kolkata',
+                          dateStyle: 'medium',
+                          timeStyle: 'short',
+                        })} IST
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="bg-purple-900/60 border border-purple-700/60 px-2 py-0.5 rounded text-[10px] text-amber-200 uppercase font-mono">
+                          {entry.source || 'coming_soon'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>

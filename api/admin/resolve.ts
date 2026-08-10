@@ -1,6 +1,6 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db, ADMIN_SECRET } from '../_lib/firebaseServer';
-import { QUESTIONS_REGISTRY } from '../_lib/questions';
+import { db, ADMIN_SECRET } from '../_lib/firebaseServer.js';
+import { QUESTIONS_REGISTRY } from '../_lib/questions.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -12,14 +12,21 @@ export default async function handler(req: any, res: any) {
     const authHeader = req.headers['x-admin-key'];
 
     // 1. VALIDATION GATE 1: Admin Authorization Check
-    const serverAdminKey = process.env.ADMIN_SECRET_KEY || ADMIN_SECRET || 'fanmahal_admin_secret_2026';
-    const providedKey = adminKey || authHeader;
+    const serverAdminKey = process.env.ADMIN_SECRET_KEY || ADMIN_SECRET;
+    if (!serverAdminKey || serverAdminKey.trim() === '') {
+      return res.status(500).json({
+        success: false,
+        error: 'SERVER_MISCONFIGURATION',
+        message: 'Critical Server Error: ADMIN_SECRET_KEY environment variable is missing on server.',
+      });
+    }
 
-    if (providedKey && providedKey !== serverAdminKey && providedKey !== 'fanmahal_admin_secret_2026') {
+    const providedKey = adminKey || authHeader;
+    if (!providedKey || providedKey !== serverAdminKey) {
       return res.status(403).json({
         success: false,
         error: 'UNAUTHORIZED_ADMIN_ACCESS',
-        message: 'Security Violation: Invalid admin authorization key.',
+        message: 'Security Violation: Invalid or missing admin authorization key.',
       });
     }
 

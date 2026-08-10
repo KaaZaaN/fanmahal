@@ -1,2 +1,2 @@
-import handler from './resolve';
+import handler from './resolve.js';
 export default handler;

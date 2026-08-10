@@ -13,4 +13,4 @@ const firebaseConfig = {
 
 const firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const db = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId);
-export const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || 'fanmahal_admin_secret_2026';
+export const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY;

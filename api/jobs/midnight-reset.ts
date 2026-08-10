@@ -1,6 +1,6 @@
 import { collection, getDocs, writeBatch, query, where } from 'firebase/firestore';
-import { db, ADMIN_SECRET } from '../_lib/firebaseServer';
-import { QUESTIONS_REGISTRY } from '../_lib/questions';
+import { db, ADMIN_SECRET } from '../_lib/firebaseServer.js';
+import { QUESTIONS_REGISTRY } from '../_lib/questions.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {

@@ -1,5 +1,5 @@
 import { collection, getDocs, writeBatch } from 'firebase/firestore';
-import { db, ADMIN_SECRET } from '../_lib/firebaseServer';
+import { db, ADMIN_SECRET } from '../_lib/firebaseServer.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -10,6 +10,14 @@ export default async function handler(req: any, res: any) {
     const authHeader = req.headers['x-admin-key'];
     const bodyKey = req.body?.adminKey;
     const serverAdminKey = process.env.ADMIN_SECRET_KEY || ADMIN_SECRET;
+
+    if (!serverAdminKey || serverAdminKey.trim() === '') {
+      return res.status(500).json({
+        success: false,
+        error: 'SERVER_MISCONFIGURATION',
+        message: 'Critical Server Error: ADMIN_SECRET_KEY environment variable is missing on server.',
+      });
+    }
 
     const providedKey = bodyKey || authHeader;
     if (!providedKey || providedKey !== serverAdminKey) {

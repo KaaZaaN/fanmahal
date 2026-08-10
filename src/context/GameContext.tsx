@@ -13,7 +13,7 @@ import {
 } from '../types';
 import { INITIAL_QUESTIONS, MOCK_LEADERBOARD } from '../data/mockData';
 import confetti from 'canvas-confetti';
-import { db, auth, signOut, getRedirectResult } from '../lib/firebase';
+import { db, auth, signOut, getRedirectResult, isSignInWithEmailLink, signInWithEmailLink } from '../lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 
 export const FOUNDER_EMAIL = 'prithvi@fanmahal.com';
@@ -269,6 +269,42 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .catch((error) => {
         console.warn('Google Redirect Sign-In error:', error);
       });
+
+    // Process Passwordless Email Link Sign-In if opening email magic link
+    if (typeof window !== 'undefined' && isSignInWithEmailLink(auth, window.location.href)) {
+      let emailForSignIn = window.localStorage.getItem('emailForSignIn');
+      if (!emailForSignIn) {
+        emailForSignIn = window.prompt('Please enter the email address you used to request sign-in:');
+      }
+      if (emailForSignIn) {
+        signInWithEmailLink(auth, emailForSignIn, window.location.href)
+          .then((result) => {
+            window.localStorage.removeItem('emailForSignIn');
+            try {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (e) {
+              // Ignore in iframe sandboxes
+            }
+
+            if (result.user && result.user.email) {
+              const userEmail = result.user.email;
+              const handlePart = (result.user.displayName || userEmail.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '');
+              login(
+                userEmail,
+                `@${handlePart || 'BiggBossFan'}`,
+                '👑',
+                'Reality TV Oracle',
+                `@${handlePart || 'BiggBossFan'}_ig`,
+                ''
+              );
+            }
+          })
+          .catch((error) => {
+            console.error('Error signing in with email link:', error);
+            alert('The sign-in link is invalid or has expired. Please request a new sign-in link.');
+          });
+      }
+    }
   }, []);
 
   const [questions, setQuestions] = useState<Question[]>(() => {

@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
-import { X, Mail, KeyRound, User, Sparkles, CheckCircle2, Crown, ShieldCheck, ArrowRight } from 'lucide-react';
+import { X, Mail, User, Sparkles, CheckCircle2, Crown, ShieldCheck, ArrowRight, MailCheck } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { PRESET_AVATARS, PRESET_BADGES } from '../data/mockData';
-import { auth, googleProvider, signInWithRedirect, signInWithPopup } from '../lib/firebase';
+import { auth, googleProvider, signInWithRedirect, signInWithPopup, sendSignInLinkToEmail } from '../lib/firebase';
 
 export const AuthModal: React.FC = () => {
   const { showAuthModal, setShowAuthModal, login } = useGame();
 
-  const [step, setStep] = useState<'EMAIL' | 'OTP' | 'PROFILE'>('EMAIL');
+  const [step, setStep] = useState<'EMAIL' | 'MAGIC_LINK_SENT' | 'PROFILE'>('EMAIL');
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [username, setUsername] = useState('');
   const [instagramHandle, setInstagramHandle] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState('👑');
   const [selectedBadge, setSelectedBadge] = useState('Reality TV Oracle');
   const [agreedTerms, setAgreedTerms] = useState(false);
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [otpError, setOtpError] = useState('');
+  const [isSendingLink, setIsSendingLink] = useState(false);
+  const [linkError, setLinkError] = useState('');
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   if (!showAuthModal) return null;
@@ -39,10 +38,10 @@ export const AuthModal: React.FC = () => {
           setStep('PROFILE');
         }
       } catch (popupErr: any) {
-        console.warn('Popup fallback also failed:', popupErr);
-        setEmail('google_user@gmail.com');
-        setUsername('@GoogleFan');
-        setInstagramHandle('@GoogleFan_ig');
+        console.warn('Popup fallback error:', popupErr);
+        setEmail('user@fanmahal.com');
+        setUsername('@FanmahalOracle');
+        setInstagramHandle('@FanmahalOracle_ig');
         setStep('PROFILE');
       }
     } finally {
@@ -50,45 +49,34 @@ export const AuthModal: React.FC = () => {
     }
   };
 
-  if (!showAuthModal) return null;
-
-  const handleSendOtp = (e: React.FormEvent) => {
+  const handleSendMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) return;
 
-    setIsSendingOtp(true);
-    setTimeout(() => {
-      setIsSendingOtp(false);
-      setStep('OTP');
-      // Pre-fill default handle proposal from email prefix
+    setIsSendingLink(true);
+    setLinkError('');
+
+    const actionCodeSettings = {
+      url: typeof window !== 'undefined' ? `${window.location.origin}` : 'https://fanmahal.com',
+      handleCodeInApp: true,
+    };
+
+    try {
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('emailForSignIn', email);
+      }
+      // Pre-fill profile handles
       const handlePart = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '');
       setUsername(`@${handlePart || 'BiggBossFan'}`);
       setInstagramHandle(`@${handlePart || 'BiggBossFan'}_ig`);
-    }, 600);
-  };
-
-  const handleOtpChange = (index: number, val: string) => {
-    if (val.length > 1) val = val.slice(-1);
-    const newOtp = [...otp];
-    newOtp[index] = val;
-    setOtp(newOtp);
-
-    // Auto focus next input
-    if (val && index < 5) {
-      const nextInput = document.getElementById(`otp-input-${index + 1}`);
-      nextInput?.focus();
+      setStep('MAGIC_LINK_SENT');
+    } catch (err: any) {
+      console.error('Error sending sign in link to email:', err);
+      setLinkError(err?.message || 'Failed to send sign-in link. Please check your email address.');
+    } finally {
+      setIsSendingLink(false);
     }
-  };
-
-  const handleVerifyOtp = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const enteredOtp = otp.join('');
-    if (enteredOtp.length !== 6) {
-      setOtpError('Please enter all 6 digits');
-      return;
-    }
-    setOtpError('');
-    setStep('PROFILE');
   };
 
   const handleCompleteSignUp = (e: React.FormEvent) => {
@@ -171,13 +159,13 @@ export const AuthModal: React.FC = () => {
         <div className="relative mb-6 flex items-center justify-center">
           <div className="border-t border-purple-800/50 w-full" />
           <span className="bg-[#1C023E] px-3 text-[11px] font-semibold text-purple-400 uppercase tracking-widest absolute">
-            Or Standard Email Sign-In
+            Or Passwordless Email Sign-In
           </span>
         </div>
 
         {/* STEP 1: EMAIL ENTRY */}
         {step === 'EMAIL' && (
-          <form onSubmit={handleSendOtp} className="space-y-4">
+          <form onSubmit={handleSendMagicLink} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-purple-200 mb-1.5">
                 Enter your email address
@@ -196,21 +184,27 @@ export const AuthModal: React.FC = () => {
               </div>
               <p className="text-[11px] text-purple-300/60 mt-1 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                We send a 6-digit verification code to your email
+                We'll send a secure passwordless sign-in link to your email inbox
               </p>
             </div>
 
+            {linkError && (
+              <p className="text-xs text-rose-400 text-center font-medium bg-rose-950/60 p-2.5 rounded-xl border border-rose-500/30">
+                {linkError}
+              </p>
+            )}
+
             <button
               type="submit"
-              disabled={isSendingOtp}
+              disabled={isSendingLink}
               id="auth-send-otp-btn"
               className="w-full bg-gradient-to-r from-[#FF1E94] via-[#D946EF] to-[#8B5CF6] hover:opacity-90 text-white font-bold py-3 rounded-xl shadow-lg shadow-[#FF1E94]/30 transition flex items-center justify-center gap-2"
             >
-              {isSendingOtp ? (
-                <span>Sending Verification Code...</span>
+              {isSendingLink ? (
+                <span>Sending Magic Sign-In Link...</span>
               ) : (
                 <>
-                  <span>Get 6-Digit OTP Code</span>
+                  <span>Send Magic Sign-In Link</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -218,51 +212,39 @@ export const AuthModal: React.FC = () => {
           </form>
         )}
 
-        {/* STEP 2: 6-DIGIT OTP VERIFICATION */}
-        {step === 'OTP' && (
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-800/40 text-purple-300 mb-2">
-                <KeyRound className="w-5 h-5 text-amber-400" />
-              </div>
-              <p className="text-xs text-purple-200">
-                Code sent to <span className="font-bold text-amber-300">{email}</span>
-              </p>
+        {/* STEP 2: MAGIC LINK SENT CONFIRMATION */}
+        {step === 'MAGIC_LINK_SENT' && (
+          <div className="space-y-4 text-center py-2 animate-fadeIn">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 mb-1">
+              <MailCheck className="w-7 h-7" />
             </div>
 
-            <div className="flex justify-between gap-2 my-4">
-              {otp.map((digit, idx) => (
-                <input
-                  key={idx}
-                  id={`otp-input-${idx}`}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(idx, e.target.value)}
-                  className="w-11 h-12 text-center text-xl font-bold bg-[#130129] border border-purple-500/50 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 rounded-xl text-amber-300 outline-none transition"
-                />
-              ))}
-            </div>
+            <h3 className="text-lg font-bold text-white">Check Your Inbox</h3>
 
-            {otpError && (
-              <p className="text-xs text-rose-400 text-center font-medium">{otpError}</p>
-            )}
+            <p className="text-xs text-purple-200 leading-relaxed max-w-xs mx-auto">
+              We emailed a passwordless sign-in link to{' '}
+              <span className="font-extrabold text-amber-300">{email}</span>. Click the link in your email on any device to log in automatically!
+            </p>
+
+            <div className="p-3 bg-purple-950/60 rounded-2xl border border-purple-700/40 text-[11px] text-purple-300/80 leading-normal text-left">
+              💡 <strong>Tip:</strong> If you don't see the email within 1-2 minutes, check your <strong>Spam / Junk</strong> folder or click below to resend.
+            </div>
 
             <div className="flex gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setStep('EMAIL')}
-                className="w-1/3 py-2.5 bg-purple-950 hover:bg-purple-900 border border-purple-700/40 rounded-xl text-xs text-purple-300 font-semibold"
+                className="w-1/2 py-2.5 bg-purple-950 hover:bg-purple-900 border border-purple-700/40 rounded-xl text-xs text-purple-300 font-semibold transition"
               >
-                Back
+                Change Email
               </button>
               <button
                 type="button"
-                onClick={handleVerifyOtp}
-                id="auth-verify-otp-btn"
-                className="w-2/3 bg-gradient-to-r from-[#FF1E94] to-[#8B5CF6] hover:opacity-90 text-white font-bold py-2.5 rounded-xl shadow-lg transition"
+                onClick={handleSendMagicLink}
+                disabled={isSendingLink}
+                className="w-1/2 bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/40 text-amber-300 font-bold py-2.5 rounded-xl transition text-xs"
               >
-                Verify & Continue
+                {isSendingLink ? 'Resending...' : 'Resend Link'}
               </button>
             </div>
           </div>
@@ -430,3 +412,4 @@ export const AuthModal: React.FC = () => {
     </div>
   );
 };
+

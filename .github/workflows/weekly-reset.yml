@@ -18,7 +18,7 @@ jobs:
             -H "X-Admin-Key: ${{ secrets.ADMIN_SECRET_KEY }}")
           
           HTTP_BODY=$(echo "$RESPONSE" | sed -e 's/HTTP_STATUS\:.*//g')
-          HTTP_STATUS=$(echo "$RESPONSE" | grep -oP 'HTTP_STATUS:\K[0-9]+')
+          HTTP_STATUS=$(echo "$RESPONSE" | sed -n 's/.*HTTP_STATUS:\([0-9]*\).*/\1/p')
 
           echo "Response Body: $HTTP_BODY"
           echo "HTTP Status: $HTTP_STATUS"

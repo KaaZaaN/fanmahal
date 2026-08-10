@@ -15,6 +15,7 @@ export const AuthModal: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState('👑');
   const [selectedBadge, setSelectedBadge] = useState('Reality TV Oracle');
+  const [agreedTerms, setAgreedTerms] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otpError, setOtpError] = useState('');
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -100,6 +101,10 @@ export const AuthModal: React.FC = () => {
 
   const handleCompleteSignUp = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreedTerms) {
+      alert('You must agree to the Terms of Service and Privacy Policy to create an account.');
+      return;
+    }
     if (!username.trim()) return;
     login(email, username, selectedAvatar, selectedBadge, instagramHandle, phoneNumber);
   };
@@ -423,10 +428,47 @@ export const AuthModal: React.FC = () => {
               </span>
             </div>
 
+            {/* Terms of Service & Privacy Policy Agreement Checkbox */}
+            <div className="flex items-start gap-2.5 p-3 bg-[#130129] border border-purple-600/40 rounded-xl">
+              <input
+                type="checkbox"
+                id="auth-terms-checkbox"
+                required
+                checked={agreedTerms}
+                onChange={(e) => setAgreedTerms(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-purple-500 bg-[#1A023B] text-[#FF1E94] focus:ring-[#FF1E94] cursor-pointer"
+              />
+              <label htmlFor="auth-terms-checkbox" className="text-xs text-purple-200 leading-snug cursor-pointer">
+                I agree to the{' '}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-300 hover:underline font-bold"
+                >
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-300 hover:underline font-bold"
+                >
+                  Privacy Policy
+                </a>.
+              </label>
+            </div>
+
             <button
               type="submit"
+              disabled={!agreedTerms}
               id="auth-complete-signup-btn"
-              className="w-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:opacity-90 text-slate-950 font-extrabold py-3 rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2"
+              className={`w-full font-extrabold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 ${
+                agreedTerms
+                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:opacity-90 text-slate-950 shadow-amber-500/20'
+                  : 'bg-slate-700/60 text-slate-400 border border-slate-600/40 cursor-not-allowed opacity-70'
+              }`}
             >
               <Sparkles className="w-4 h-4 text-slate-900" />
               <span>Enter Fanmahal Palace</span>

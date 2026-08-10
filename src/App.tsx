@@ -11,11 +11,15 @@ import { HomeView } from './views/HomeView';
 import { LeaderboardView } from './views/LeaderboardView';
 import { ProfileView } from './views/ProfileView';
 import { AdminView } from './views/AdminView';
+import { PrivacyView } from './views/PrivacyView';
+import { TermsView } from './views/TermsView';
 import { FanmahalLogo } from './components/FanmahalLogo';
 import { Crown, Sparkles, ShieldCheck, Heart, Tv, ExternalLink, AlertTriangle, ShieldAlert } from 'lucide-react';
 
+type ViewType = 'predictions' | 'leaderboard' | 'profile' | 'admin' | 'privacy' | 'terms';
+
 function MainLayout() {
-  const getInitialView = (): 'predictions' | 'leaderboard' | 'profile' | 'admin' => {
+  const getInitialView = (): ViewType => {
     if (typeof window === 'undefined') return 'predictions';
     const path = window.location.pathname.toLowerCase();
     const hash = window.location.hash.toLowerCase();
@@ -25,10 +29,12 @@ function MainLayout() {
     }
     if (path.includes('/leaderboard') || hash.includes('leaderboard')) return 'leaderboard';
     if (path.includes('/profile') || hash.includes('profile')) return 'profile';
+    if (path.includes('/privacy') || hash.includes('privacy')) return 'privacy';
+    if (path.includes('/terms') || hash.includes('terms')) return 'terms';
     return 'predictions';
   };
 
-  const [currentView, setCurrentView] = useState<'predictions' | 'leaderboard' | 'profile' | 'admin'>(getInitialView);
+  const [currentView, setCurrentView] = useState<ViewType>(getInitialView);
   const { user } = useGame();
 
   React.useEffect(() => {
@@ -41,6 +47,10 @@ function MainLayout() {
         setCurrentView('leaderboard');
       } else if (path.includes('/profile') || hash.includes('profile')) {
         setCurrentView('profile');
+      } else if (path.includes('/privacy') || hash.includes('privacy')) {
+        setCurrentView('privacy');
+      } else if (path.includes('/terms') || hash.includes('terms')) {
+        setCurrentView('terms');
       } else {
         setCurrentView('predictions');
       }
@@ -50,8 +60,9 @@ function MainLayout() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const handleNavigate = (view: 'predictions' | 'leaderboard' | 'profile' | 'admin') => {
+  const handleNavigate = (view: ViewType) => {
     setCurrentView(view);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
       if (view === 'admin') {
         window.history.pushState({}, '', '/moderator');
@@ -86,7 +97,7 @@ function MainLayout() {
       )}
 
       {/* Top Navbar */}
-      <Navbar currentView={currentView} setCurrentView={handleNavigate} />
+      <Navbar currentView={currentView as any} setCurrentView={handleNavigate as any} />
 
       {/* Main View Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 relative z-10">
@@ -94,6 +105,8 @@ function MainLayout() {
         {currentView === 'leaderboard' && <LeaderboardView />}
         {currentView === 'profile' && <ProfileView />}
         {currentView === 'admin' && <AdminView />}
+        {currentView === 'privacy' && <PrivacyView onNavigateBack={() => handleNavigate('predictions')} />}
+        {currentView === 'terms' && <TermsView onNavigateBack={() => handleNavigate('predictions')} />}
       </main>
 
       {/* Global Modals */}
@@ -127,12 +140,37 @@ function MainLayout() {
             <span className="text-purple-600">•</span>
             <span>Free 800 Fan Coins added every week on Monday mornings.</span>
             <span className="text-purple-600">•</span>
-            <span>Zero Cash / Physical Hampers & Shopping Vouchers and more</span>
+            <span>Zero Cash / Physical Hampers & Shopping Vouchers</span>
             <span className="text-purple-600">•</span>
             <span>India Online Gaming Act 2025 Compliant</span>
           </div>
 
-          <p className="text-[10px] text-purple-400/60 pt-2 font-mono">
+          {/* Legal Links Footer Bar */}
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold pt-2 border-t border-purple-900/40 max-w-md mx-auto">
+            <a
+              href="/terms"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavigate('terms');
+              }}
+              className="text-purple-300 hover:text-amber-300 underline transition"
+            >
+              Terms of Service
+            </a>
+            <span className="text-purple-600">•</span>
+            <a
+              href="/privacy"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavigate('privacy');
+              }}
+              className="text-purple-300 hover:text-amber-300 underline transition"
+            >
+              Privacy Policy
+            </a>
+          </div>
+
+          <p className="text-[10px] text-purple-400/60 pt-1 font-mono">
             © 2026 Fanmahal Palace. Built for Reality TV Superfans across India.
           </p>
         </div>

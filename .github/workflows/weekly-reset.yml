@@ -12,7 +12,7 @@ jobs:
       - name: Trigger Weekly Reset Endpoint
         run: |
           echo "Triggering Fanmahal Weekly Reset Endpoint..."
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "${{ secrets.APP_URL }}/api/jobs/weekly-reset" \
+          RESPONSE=$(curl -s -L -w "\nHTTP_STATUS:%{http_code}" -X POST "${{ secrets.APP_URL }}/api/jobs/weekly-reset" \
             -H "Content-Type: application/json" \
             -H "X-Admin-Key: ${{ secrets.ADMIN_SECRET_KEY }}")
           

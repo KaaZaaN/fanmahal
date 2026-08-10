@@ -1,29 +1,28 @@
-name: Fanmahal Daily Midnight Reset Job
+name: Fanmahal Weekly Sunday Reset Job
 
 on:
   schedule:
-    # 00:00 IST corresponds to 18:30 UTC of the previous day (UTC = IST - 5:30)
-    - cron: '30 18 * * *'
-  workflow_dispatch: # Allows manual triggers from GitHub UI
+    - cron: '30 18 * * 0'
+  workflow_dispatch:
 
 jobs:
-  midnight-reset:
+  weekly-reset:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Midnight Reset Endpoint
+      - name: Trigger Weekly Reset Endpoint
         run: |
-          echo "Triggering Fanmahal Midnight Reset Endpoint..."
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "${{ secrets.APP_URL }}/api/jobs/midnight-reset" \
+          echo "Triggering Fanmahal Weekly Reset Endpoint..."
+          RESPONSE=$(curl -s -L -w "\nHTTP_STATUS:%{http_code}" -X POST "${{ secrets.APP_URL }}/api/jobs/weekly-reset" \
             -H "Content-Type: application/json" \
             -H "X-Admin-Key: ${{ secrets.ADMIN_SECRET_KEY }}")
           
           HTTP_BODY=$(echo "$RESPONSE" | sed -e 's/HTTP_STATUS\:.*//g')
-          HTTP_STATUS=$(echo "$RESPONSE" | tr -d '\n' | sed -e 's/.*HTTP_STATUS://')
+          HTTP_STATUS=$(echo "$RESPONSE" | sed -n 's/.*HTTP_STATUS:\([0-9]*\).*/\1/p')
 
           echo "Response Body: $HTTP_BODY"
           echo "HTTP Status: $HTTP_STATUS"
 
-          if [ "$HTTP_STATUS" -ne 200 ]; then
-            echo "::error::Midnight Reset Failed with HTTP status $HTTP_STATUS"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "::error::Weekly Reset Failed with HTTP status $HTTP_STATUS"
             exit 1
           fi

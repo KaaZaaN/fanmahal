@@ -9,9 +9,20 @@ jobs:
   weekly-reset:
     runs-on: ubuntu-latest
     steps:
-      - name: DEBUG - Raw curl output
+      - name: Trigger Weekly Reset Endpoint
         run: |
-          echo "Target URL: ${{ secrets.APP_URL }}/api/jobs/weekly-reset"
-          curl -v -X POST "${{ secrets.APP_URL }}/api/jobs/weekly-reset" \
+          echo "Triggering Fanmahal Weekly Reset Endpoint..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "${{ secrets.APP_URL }}/api/jobs/weekly-reset" \
             -H "Content-Type: application/json" \
-            -H "X-Admin-Key: ${{ secrets.ADMIN_SECRET_KEY }}"
+            -H "X-Admin-Key: ${{ secrets.ADMIN_SECRET_KEY }}")
+          
+          HTTP_BODY=$(echo "$RESPONSE" | sed -e 's/HTTP_STATUS\:.*//g')
+          HTTP_STATUS=$(echo "$RESPONSE" | sed -n 's/.*HTTP_STATUS:\([0-9]*\).*/\1/p')
+
+          echo "Response Body: $HTTP_BODY"
+          echo "HTTP Status: $HTTP_STATUS"
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "::error::Weekly Reset Failed with HTTP status $HTTP_STATUS"
+            exit 1
+          fi

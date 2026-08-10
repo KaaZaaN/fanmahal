@@ -38,10 +38,25 @@ function MainLayout() {
   const { user, setShowAuthModal } = useGame();
 
   useEffect(() => {
+    const checkAndTriggerFounderLogin = () => {
+      if (typeof window === 'undefined') return;
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      const search = window.location.search.toLowerCase();
+      if (path.includes('/founder-login') || hash.includes('founder-login') || search.includes('founder-login')) {
+        setShowAuthModal(true);
+      }
+    };
+
+    checkAndTriggerFounderLogin();
+
     const handlePopState = () => {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
-      if (path.includes('/moderator') || hash.includes('moderator')) {
+      const search = window.location.search.toLowerCase();
+      if (path.includes('/founder-login') || hash.includes('founder-login') || search.includes('founder-login')) {
+        setShowAuthModal(true);
+      } else if (path.includes('/moderator') || hash.includes('moderator')) {
         setCurrentView('admin');
       } else if (path.includes('/leaderboard') || hash.includes('leaderboard')) {
         setCurrentView('leaderboard');
@@ -58,7 +73,7 @@ function MainLayout() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [setShowAuthModal]);
 
   const handleNavigate = (view: ViewType) => {
     setCurrentView(view);

@@ -9,22 +9,23 @@ import { useGame } from '../context/GameContext';
 interface ComingSoonViewProps {
   onNavigateTerms: () => void;
   onNavigatePrivacy: () => void;
-  onFounderBypass: () => void;
+  onFounderBypass?: () => void;
 }
+
+const BASE_WAITLIST_COUNT = 223;
 
 export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
   onNavigateTerms,
   onNavigatePrivacy,
-  onFounderBypass,
 }) => {
   const { setShowAuthModal } = useGame();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [waitlistCount, setWaitlistCount] = useState<number>(0);
+  const [waitlistCount, setWaitlistCount] = useState<number>(BASE_WAITLIST_COUNT);
 
-  // Subscribe to live waitlist count from Firestore
+  // Subscribe to live waitlist count from Firestore, starting from base 223
   useEffect(() => {
     let unsubscribe = () => {};
     try {
@@ -32,17 +33,16 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
       unsubscribe = onSnapshot(
         q,
         (snapshot) => {
-          setWaitlistCount(snapshot.size);
+          setWaitlistCount(BASE_WAITLIST_COUNT + snapshot.size);
         },
         (error) => {
           console.warn('Firestore waitlist count listener notice:', error);
-          // Fallback static count if offline
-          setWaitlistCount(128);
+          setWaitlistCount(BASE_WAITLIST_COUNT);
         }
       );
     } catch (e) {
       console.warn('Error setting up waitlist listener:', e);
-      setWaitlistCount(128);
+      setWaitlistCount(BASE_WAITLIST_COUNT);
     }
     return () => unsubscribe();
   }, []);
@@ -219,19 +219,6 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
           >
             IG @thefanmahal
           </a>
-          <span className="text-purple-700">•</span>
-          
-          {/* Founder Access Sign-In Link */}
-          <button
-            onClick={() => {
-              setShowAuthModal(true);
-            }}
-            id="btn-founder-access-signin"
-            className="text-amber-400/80 hover:text-amber-300 font-extrabold flex items-center gap-1 transition cursor-pointer hover:underline"
-          >
-            <Lock className="w-3 h-3 text-amber-400" />
-            <span>Founder Sign In</span>
-          </button>
         </div>
 
         <p className="text-[10px] text-purple-400/50 font-mono">

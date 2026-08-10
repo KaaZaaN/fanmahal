@@ -3,7 +3,7 @@ import { Crown, Sparkles } from 'lucide-react';
 import officialLogoImg from '../assets/images/fanmahal_actual_logo_1785989885640.jpg';
 
 interface FanmahalLogoProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   showSubtitle?: boolean;
   showIgHandle?: boolean;
 }
@@ -18,17 +18,19 @@ export const FanmahalLogo: React.FC<FanmahalLogoProps> = ({
   const iconSizes = {
     sm: 'w-9 h-9 rounded-xl',
     md: 'w-11 h-11 rounded-2xl',
-    lg: 'w-16 h-16 rounded-3xl',
+    lg: 'w-14 h-14 rounded-2xl',
+    xl: 'w-14 h-14 sm:w-16 sm:h-16 rounded-2xl',
   };
 
   const titleSizes = {
     sm: 'text-lg',
     md: 'text-2xl',
-    lg: 'text-4xl',
+    lg: 'text-3xl',
+    xl: 'text-3xl sm:text-4xl',
   };
 
   return (
-    <div className="flex items-center gap-3 group">
+    <div className="flex items-center justify-center gap-3 group">
       {/* Royal Crown / Logo Image Badge */}
       <div className={`relative ${iconSizes[size]} bg-gradient-to-br from-[#F5C542] via-[#FF1E94] to-[#22034D] p-[2px] rounded-2xl group-hover:scale-105 transition-transform overflow-hidden shrink-0 border border-amber-400/40`}>
         <div className="w-full h-full bg-[#110125] rounded-[inherit] flex items-center justify-center overflow-hidden">

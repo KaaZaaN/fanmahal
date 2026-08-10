@@ -150,7 +150,7 @@ const INITIAL_ANNOUNCEMENTS: Announcement[] = [
     title: '⚡ Bigg Boss 18 Elimination Predictions Open!',
     message: 'Place your Fan Coins predictions before the Friday 10 PM IST deadline. Live Crown payouts settle right after the broadcast!',
     type: 'INFO',
-    active: true,
+    active: false,
     timestamp: Date.now() - 3600000,
     linkUrl: 'https://instagram.com/thefanmahal',
   },

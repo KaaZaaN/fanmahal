@@ -91,14 +91,6 @@ export const AuthModal: React.FC = () => {
     setStep('PROFILE');
   };
 
-  const handleAutoFillDemoOtp = () => {
-    setOtp(['8', '8', '4', '2', '1', '9']);
-    setOtpError('');
-    setTimeout(() => {
-      setStep('PROFILE');
-    }, 300);
-  };
-
   const handleCompleteSignUp = (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreedTerms) {
@@ -106,16 +98,18 @@ export const AuthModal: React.FC = () => {
       return;
     }
     if (!username.trim()) return;
-    login(email, username, selectedAvatar, selectedBadge, instagramHandle, phoneNumber);
-  };
 
-  const handleQuickDemoLogin = (demoName: string, demoEmail: string, avatar: string, badge: string) => {
-    login(demoEmail, demoName, avatar, badge);
+    try {
+      login(email, username, selectedAvatar, selectedBadge, instagramHandle, phoneNumber);
+    } catch (err) {
+      console.error('Error completing signup:', err);
+      alert('An unexpected error occurred during signup. Please try again.');
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-md bg-gradient-to-b from-[#250352] to-[#14012C] border border-[#FF1E94]/40 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-[#FF1E94]/20 text-purple-100 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fadeIn overflow-y-auto my-auto">
+      <div className="relative w-full max-w-md bg-gradient-to-b from-[#250352] to-[#14012C] border border-[#FF1E94]/40 rounded-3xl p-5 sm:p-7 shadow-2xl shadow-[#FF1E94]/20 text-purple-100 max-h-[90vh] overflow-y-auto my-auto scrollbar-thin scrollbar-thumb-purple-600">
         {/* Top Gold & Magenta Glow Accent */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#F5C542] to-transparent shadow-[0_0_15px_#F5C542]" />
 
@@ -253,16 +247,6 @@ export const AuthModal: React.FC = () => {
             {otpError && (
               <p className="text-xs text-rose-400 text-center font-medium">{otpError}</p>
             )}
-
-            <button
-              type="button"
-              onClick={handleAutoFillDemoOtp}
-              id="auth-auto-otp-btn"
-              className="w-full py-2 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/40 rounded-xl text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              Auto-fill Demo Code (884219)
-            </button>
 
             <div className="flex gap-2 pt-2">
               <button

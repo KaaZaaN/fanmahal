@@ -6,11 +6,20 @@ import { calculateRaffleTickets } from '../utils/raffle';
 
 interface NavbarProps {
   currentView: 'predictions' | 'leaderboard' | 'profile' | 'admin';
-  setCurrentView: (view: 'predictions' | 'leaderboard' | 'profile' | 'admin') => void;
+  onNavigate?: (view: 'predictions' | 'leaderboard' | 'profile' | 'admin') => void;
+  setCurrentView?: (view: 'predictions' | 'leaderboard' | 'profile' | 'admin') => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, setCurrentView }) => {
   const { user, setShowAuthModal, setShowAdModal, setShowSimulatorModal, setShowRaffleModal, logout } = useGame();
+
+  const handleNav = (view: 'predictions' | 'leaderboard' | 'profile' | 'admin') => {
+    if (onNavigate) {
+      onNavigate(view);
+    } else if (setCurrentView) {
+      setCurrentView(view);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-[#110125]/95 backdrop-blur-md border-b border-[#FF1E94]/20 shadow-2xl">
@@ -19,7 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
           {/* Brand / Logo */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setCurrentView('predictions')}
+              onClick={() => handleNav('predictions')}
               className="flex items-center group text-left transition"
               id="brand-logo-btn"
             >
@@ -30,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
           {/* Desktop Navigation Tabs */}
           <nav className="hidden md:flex items-center gap-1 bg-[#12012B] p-1.5 rounded-full border border-purple-800/40">
             <button
-              onClick={() => setCurrentView('predictions')}
+              onClick={() => handleNav('predictions')}
               id="nav-predictions-btn"
               className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold transition ${
                 currentView === 'predictions'
@@ -43,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
             </button>
 
             <button
-              onClick={() => setCurrentView('leaderboard')}
+              onClick={() => handleNav('leaderboard')}
               id="nav-leaderboard-btn"
               className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold transition ${
                 currentView === 'leaderboard'
@@ -56,7 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
             </button>
 
             <button
-              onClick={() => setCurrentView('profile')}
+              onClick={() => handleNav('profile')}
               id="nav-profile-btn"
               className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold transition ${
                 currentView === 'profile'
@@ -71,7 +80,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
             {/* Admin/Moderator Studio Button (Visible to authorized staff or when visiting /moderator) */}
             {(user?.isAdmin || currentView === 'admin') && (
               <button
-                onClick={() => setCurrentView('admin')}
+                onClick={() => handleNav('admin')}
                 id="nav-admin-btn"
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition ${
                   currentView === 'admin'
@@ -130,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
 
                 {/* User Profile Button */}
                 <button
-                  onClick={() => setCurrentView('profile')}
+                  onClick={() => handleNav('profile')}
                   id="navbar-user-btn"
                   className="flex items-center gap-2 bg-[#260554] border border-purple-500/30 hover:border-[#FF1E94] px-2.5 py-1.5 rounded-xl transition"
                 >
@@ -187,7 +196,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
       {/* Mobile Navigation Bar (Bottom Fixed) */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#12012B]/95 backdrop-blur-lg border-t border-[#FF1E94]/30 px-3 py-2 flex items-center justify-around shadow-2xl">
         <button
-          onClick={() => setCurrentView('predictions')}
+          onClick={() => handleNav('predictions')}
           id="mobile-nav-predictions"
           className={`flex flex-col items-center gap-1 text-[11px] font-semibold transition ${
             currentView === 'predictions' ? 'text-[#FF1E94]' : 'text-purple-300/70 hover:text-white'
@@ -198,7 +207,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
         </button>
 
         <button
-          onClick={() => setCurrentView('leaderboard')}
+          onClick={() => handleNav('leaderboard')}
           id="mobile-nav-leaderboard"
           className={`flex flex-col items-center gap-1 text-[11px] font-semibold transition ${
             currentView === 'leaderboard' ? 'text-amber-400' : 'text-purple-300/70 hover:text-white'
@@ -209,7 +218,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
         </button>
 
         <button
-          onClick={() => setCurrentView('profile')}
+          onClick={() => handleNav('profile')}
           id="mobile-nav-profile"
           className={`flex flex-col items-center gap-1 text-[11px] font-semibold transition ${
             currentView === 'profile' ? 'text-[#FF1E94]' : 'text-purple-300/70 hover:text-white'
@@ -221,7 +230,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) =
 
         {(user?.isAdmin || currentView === 'admin') && (
           <button
-            onClick={() => setCurrentView('admin')}
+            onClick={() => handleNav('admin')}
             id="mobile-nav-admin"
             className={`flex flex-col items-center gap-1 text-[11px] font-extrabold transition ${
               currentView === 'admin' ? 'text-amber-400' : 'text-amber-300/70 hover:text-amber-300'

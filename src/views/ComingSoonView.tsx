@@ -18,7 +18,7 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
   onNavigateTerms,
   onNavigatePrivacy,
 }) => {
-  const { setShowAuthModal } = useGame();
+  const { user, setShowAuthModal } = useGame();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -137,7 +137,20 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
 
         {/* Email Capture Form & Live Waitlist */}
         <div className="max-w-md mx-auto w-full space-y-4">
-          {submitted ? (
+          {user ? (
+            <div className="p-6 bg-gradient-to-r from-amber-500/20 via-purple-900/60 to-pink-500/20 border border-amber-400/60 rounded-3xl text-center space-y-3 shadow-2xl backdrop-blur-md animate-fadeIn">
+              <div className="text-4xl">{user.avatar}</div>
+              <h3 className="text-xl font-black text-amber-300">
+                Welcome to the Palace, {user.username}!
+              </h3>
+              <p className="text-xs text-purple-200/90 leading-relaxed max-w-sm mx-auto font-medium">
+                Your account is ready with <strong className="text-amber-300">800 Free Fan Coins</strong>! We'll notify you at <span className="text-white font-bold">{user.email}</span> the instant predictions go live.
+              </p>
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-400/10 border border-amber-400/40 rounded-full text-xs font-extrabold text-amber-300 shadow">
+                <span>Badge: {user.titleBadge}</span>
+              </div>
+            </div>
+          ) : submitted ? (
             <div className="p-6 bg-emerald-950/80 border border-emerald-500/60 rounded-2xl text-emerald-200 text-center space-y-2 shadow-2xl animate-fadeIn">
               <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
               <h3 className="text-lg font-black text-white">You're on the VIP Waitlist!</h3>

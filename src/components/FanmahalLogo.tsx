@@ -32,7 +32,7 @@ export const FanmahalLogo: React.FC<FanmahalLogoProps> = ({
   return (
     <div className="flex items-center justify-center gap-3 group">
       {/* Royal Crown / Logo Image Badge */}
-      <div className={`relative ${iconSizes[size]} p-[3px] rounded-2xl bg-gradient-to-br from-[#F5C542] via-[#FF1E94] to-[#22034D] group-hover:scale-105 transition-transform shrink-0 shadow-lg shadow-[#FF1E94]/25`}>
+      <div className={`relative ${iconSizes[size]} p-[3px] rounded-2xl bg-gradient-to-br from-[#F5C542] via-[#FF1E94] to-[#B026FF] group-hover:scale-105 transition-transform shrink-0 shadow-lg shadow-[#FF1E94]/25`}>
         <div className="w-full h-full rounded-[inherit] bg-[#110125] overflow-hidden">
           <img
             src={logoSrc}

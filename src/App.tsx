@@ -14,7 +14,8 @@ import { AdminView } from './views/AdminView';
 import { PrivacyView } from './views/PrivacyView';
 import { TermsView } from './views/TermsView';
 import { ComingSoonView } from './views/ComingSoonView';
-import { Lock } from 'lucide-react';
+import { FanmahalLogo } from './components/FanmahalLogo';
+import { Lock, ShieldAlert, ExternalLink } from 'lucide-react';
 
 type ViewType = 'predictions' | 'leaderboard' | 'profile' | 'admin' | 'privacy' | 'terms' | 'coming_soon';
 
@@ -194,7 +195,7 @@ function MainLayout() {
           </div>
 
           <p className="max-w-2xl mx-auto text-purple-300/80 text-xs leading-relaxed font-medium">
-            Fanmahal is a free-to-play fantasy prediction league for Indian reality TV fans. No real money is involved anywhere in this app. Predictions earn virtual Crowns for season leaderboards and monthly tier raffle tickets.
+            Fanmahal is a free-to-play fantasy prediction league for Indian reality TV fans. No real money is involved anywhere in this app. Predictions earn virtual Crowns for weekly leaderboards and season prizes.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-amber-300">

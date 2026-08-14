@@ -1,3 +1,5 @@
+export const ENABLE_MONTHLY_RAFFLE = false;
+
 export interface RaffleTierInfo {
   tickets: number;
   nextTierThreshold: number | null;
@@ -68,7 +70,7 @@ export const RAFFLE_ROUNDS = [
   {
     round: 1,
     minTickets: 1,
-    prizeTitle: 'Rs. 4,000 Shopping Voucher (Amazon/Flipkart)',
+    prizeTitle: '₹4,000 Voucher (Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)',
     eligibleLabel: 'Everyone with 1+ Tickets',
     afterAction: 'Winner removed + all 1-ticket holders eliminated from later rounds',
     color: 'from-amber-400 to-yellow-500',
@@ -76,7 +78,7 @@ export const RAFFLE_ROUNDS = [
   {
     round: 2,
     minTickets: 2,
-    prizeTitle: 'Rs. 2,500 Shopping Voucher (Amazon/Flipkart)',
+    prizeTitle: '₹2,500 Voucher (Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)',
     eligibleLabel: 'Remaining w/ 2+ Tickets',
     afterAction: 'Winner removed + all 2-ticket holders eliminated from later rounds',
     color: 'from-pink-500 to-rose-500',
@@ -84,7 +86,7 @@ export const RAFFLE_ROUNDS = [
   {
     round: 3,
     minTickets: 3,
-    prizeTitle: 'Rs. 1,500 Shopping Voucher (Amazon/Flipkart)',
+    prizeTitle: '₹1,500 Voucher (Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)',
     eligibleLabel: 'Remaining w/ 3+ Tickets',
     afterAction: 'Winner removed + all 3-ticket holders eliminated from later rounds',
     color: 'from-purple-500 to-indigo-500',
@@ -92,7 +94,7 @@ export const RAFFLE_ROUNDS = [
   {
     round: 4,
     minTickets: 4,
-    prizeTitle: 'Rs. 1,200 Shopping Voucher (Amazon/Flipkart)',
+    prizeTitle: '₹1,200 Voucher (Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)',
     eligibleLabel: 'Remaining w/ 4+ Tickets',
     afterAction: 'Winner removed + all 4-ticket holders eliminated from later rounds',
     color: 'from-cyan-500 to-blue-500',
@@ -100,7 +102,7 @@ export const RAFFLE_ROUNDS = [
   {
     round: 5,
     minTickets: 5,
-    prizeTitle: 'Rs. 800 Shopping Voucher (Amazon/Flipkart)',
+    prizeTitle: '₹800 Voucher (Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)',
     eligibleLabel: 'Remaining w/ exactly 5 Tickets',
     afterAction: 'Monthly Draw Complete! All prizes distributed.',
     color: 'from-emerald-400 to-teal-500',

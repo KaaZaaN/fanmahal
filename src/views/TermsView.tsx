@@ -103,7 +103,7 @@ export const TermsView: React.FC<TermsViewProps> = ({ onNavigateBack }) => {
             <li>You may stake Fan Coins (earned for free via weekly refresh, watching reward ads, or referrals) on your predicted outcome.</li>
             <li>Correct predictions earn Crowns based on the question's difficulty multiplier.</li>
             <li>Season-long Crown totals determine your leaderboard rank.</li>
-            <li>A separate monthly raffle draw, based on Crowns earned within that calendar month, offers additional prize opportunities via a publicly-conducted, third-party-verified random draw (see Section 5).</li>
+            <li>Weekly leaderboards and season milestones offer additional prize opportunities via verified scoring and leaderboards (see Section 5).</li>
           </ul>
           <p className="text-xs text-purple-300/80">
             Specific mechanics, multipliers, and thresholds may be adjusted over time to maintain game balance and fairness; material changes will be communicated on the Platform.
@@ -116,10 +116,10 @@ export const TermsView: React.FC<TermsViewProps> = ({ onNavigateBack }) => {
             5. Prizes
           </h2>
           <ul className="list-disc list-inside space-y-1.5 text-sm text-purple-200/90 leading-relaxed pl-2 border-l-2 border-[#FF1E94]/40">
-            <li>Top-ranked users on the season leaderboard, and winners of the monthly raffle draw, are eligible for prizes consisting of physical hampers, gift vouchers, or similar non-cash rewards, subject to availability and sponsor participation.</li>
+            <li>Top-ranked users on the weekly and season leaderboards are eligible for prizes consisting of physical hampers, gift vouchers, or similar non-cash rewards, subject to availability and sponsor participation.</li>
             <li><strong>Instagram handle is required</strong> to be eligible to receive any prize — this is used for public winner announcement and verification. Real identity/contact information (verified phone number, once mandatory) is used separately and privately for actual prize delivery.</li>
             <li>Fanmahal reserves the right to verify a winner's eligibility (including checking for fraudulent account activity) before delivering any prize.</li>
-            <li>Prize delivery timelines may vary; Fanmahal will make reasonable efforts to deliver prizes within a reasonable timeframe of a season or raffle cycle ending.</li>
+            <li>Prize delivery timelines may vary; Fanmahal will make reasonable efforts to deliver prizes within a reasonable timeframe of a leaderboard cycle or season ending.</li>
             <li>Winners may be responsible for any applicable taxes on prizes received, in accordance with Indian tax law.</li>
           </ul>
         </div>

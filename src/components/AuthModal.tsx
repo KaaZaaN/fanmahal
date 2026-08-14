@@ -290,7 +290,7 @@ export const AuthModal: React.FC = () => {
                 />
               </div>
               <p className="text-[10px] text-amber-200/90 mt-1.5 p-2 bg-amber-400/10 rounded-lg border border-amber-400/30">
-                <strong>Disclaimer:</strong> Entering your valid Instagram handle is mandatory to claim physical prize hampers & raffle ticket wins. Public draw announcements show IG handles only for privacy.
+                <strong>Disclaimer:</strong> Entering your valid Instagram handle is mandatory to claim physical prize hampers & weekly voucher wins. Public winner announcements show IG handles only for privacy.
               </p>
             </div>
 

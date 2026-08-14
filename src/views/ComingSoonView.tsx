@@ -49,17 +49,22 @@ const FAQ_ITEMS = [
   {
     question: 'Is this real-money gambling?',
     answer:
-      'Fanmahal is 100% free to play — nothing to pay, ever. Use your free Fan Coins to predict outcomes, climb the leaderboard, and win real prize hampers, gift vouchers, and exciting rewards through our monthly raffle draws and season-end prizes.',
+      'Fanmahal is 100% free to play — nothing to pay, ever. Use your free Fan Coins to predict outcomes, climb the leaderboard, and win weekly prizes (₹2,000 / ₹1,500 / ₹1,000 in vouchers from brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District, and more) plus real prize hampers and season-end prizes.',
   },
   {
     question: 'How do I actually win something?',
     answer:
-      'Correct predictions earn you Crowns, which rank you on the leaderboard. Top Crown holders earn entries into monthly raffle draws and win real prize hampers and gift vouchers.',
+      'Correct predictions earn you Crowns, which rank you on the leaderboard. Top weekly scorers win vouchers from popular brands such as Myntra, Amazon, Flipkart, Blinkit, Swiggy, District, and more (₹2,000 for 1st, ₹1,500 for 2nd, ₹1,000 for 3rd). Crown totals also qualify you for season hampers and exclusive rewards.',
+  },
+  {
+    question: 'What if I join late — do I still have a fair shot at winning?',
+    answer:
+      "Yes! The leaderboard resets every Monday, so it's a brand new race each week. Even if you join mid-week or missed a few episodes, you can jump in and compete fresh next Monday — no need to catch up to players who've been here longer.",
   },
   {
     question: "What if I miss an episode or can't predict every week?",
     answer:
-      'No problem! Each prediction round is independent. You can jump in whenever you watch and still earn Crowns towards weekly and monthly prizes.',
+      'No problem! Each prediction round is independent. You can jump in whenever you watch and still earn Crowns towards weekly prizes (vouchers from brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District, and more) and season rewards.',
   },
   {
     question: 'Is my data safe / what do you do with my info?',
@@ -77,6 +82,10 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [bottomEmail, setBottomEmail] = useState('');
+  const [isSubmittingBottom, setIsSubmittingBottom] = useState(false);
+  const [bottomSubmitted, setBottomSubmitted] = useState(false);
+  const [bottomErrorMessage, setBottomErrorMessage] = useState('');
   const [waitlistCount, setWaitlistCount] = useState<number>(BASE_WAITLIST_COUNT);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [selectedSampleOption, setSelectedSampleOption] = useState<number>(0);
@@ -153,13 +162,46 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
       });
 
       setSubmitted(true);
+      setBottomSubmitted(true);
       setEmail('');
     } catch (err: any) {
       console.warn('Failed to store waitlist signup to Firestore:', err);
       setSubmitted(true);
+      setBottomSubmitted(true);
       setEmail('');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleBottomSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bottomEmail || !bottomEmail.includes('@')) {
+      setBottomErrorMessage('Please enter a valid email address.');
+      return;
+    }
+
+    setIsSubmittingBottom(true);
+    setBottomErrorMessage('');
+
+    try {
+      await addDoc(collection(db, 'waitlist'), {
+        email: bottomEmail.trim().toLowerCase(),
+        createdAt: new Date().toISOString(),
+        timestamp: serverTimestamp(),
+        source: 'coming_soon_landing_bottom',
+      });
+
+      setBottomSubmitted(true);
+      setSubmitted(true);
+      setBottomEmail('');
+    } catch (err: any) {
+      console.warn('Failed to store waitlist signup to Firestore:', err);
+      setBottomSubmitted(true);
+      setSubmitted(true);
+      setBottomEmail('');
+    } finally {
+      setIsSubmittingBottom(false);
     }
   };
 
@@ -325,7 +367,7 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
                 <span>Badge: {user.titleBadge}</span>
               </div>
             </div>
-          ) : submitted ? (
+          ) : (submitted || bottomSubmitted) ? (
             <div className="p-6 bg-emerald-950/80 border border-emerald-500/60 rounded-2xl text-emerald-200 text-center space-y-2 shadow-2xl animate-fadeIn">
               <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
               <h3 className="text-lg font-black text-white">You're on the VIP Waitlist!</h3>
@@ -462,7 +504,7 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
               </div>
               <h3 className="text-base font-extrabold text-white">4. Win</h3>
               <p className="text-xs text-purple-200/80 leading-snug">
-                Top rankers get picked in monthly raffle draws and season-end prizes.
+                Top weekly scorers win vouchers from brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District, and more (₹2,000 / ₹1,500 / ₹1,000) plus season hampers and rewards.
               </p>
             </div>
           </div>
@@ -615,9 +657,10 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
               </div>
 
               <div className="flex items-center justify-between pt-0.5">
-                <h3 className="text-sm font-extrabold text-white flex items-center gap-1.5">
-                  <Crown className="w-4 h-4 text-amber-400" />
+                <h3 className="text-sm font-extrabold text-white flex flex-wrap items-baseline gap-1.5">
+                  <Crown className="w-4 h-4 text-amber-400 self-center" />
                   <span>Leaderboard</span>
+                  <span className="text-[11px] font-normal text-purple-300/80">(refreshes weekly on Monday)</span>
                 </h3>
                 <span className="text-[10px] font-mono text-purple-300/60">Sample Data</span>
               </div>
@@ -626,8 +669,8 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
               <div className="space-y-1.5 pt-0.5">
                 {[
                   { rank: 1, user: '@RealityKing', crowns: '14,850', badge: '#1 Crown Leader', badgeColor: 'bg-amber-400/20 text-amber-300 border-amber-400/50', rankBg: 'bg-amber-400 text-slate-950 font-black' },
-                  { rank: 2, user: '@PriyaVibe', crowns: '12,400', badge: 'Raffle Qualified', badgeColor: 'bg-pink-500/20 text-pink-300 border-pink-400/40', rankBg: 'bg-slate-300 text-slate-950 font-black' },
-                  { rank: 3, user: '@DesiTVFan', crowns: '10,950', badge: 'Raffle Qualified', badgeColor: 'bg-amber-700/30 text-amber-200 border-amber-600/40', rankBg: 'bg-amber-700 text-amber-100 font-black' },
+                  { rank: 2, user: '@PriyaVibe', crowns: '12,400', badge: 'Top Contender', badgeColor: 'bg-pink-500/20 text-pink-300 border-pink-400/40', rankBg: 'bg-slate-300 text-slate-950 font-black' },
+                  { rank: 3, user: '@DesiTVFan', crowns: '10,950', badge: 'Top Contender', badgeColor: 'bg-amber-700/30 text-amber-200 border-amber-600/40', rankBg: 'bg-amber-700 text-amber-100 font-black' },
                   { rank: 4, user: '@SalmanFanatic', crowns: '8,700', badge: null, rankBg: 'bg-purple-900/80 text-purple-200 border border-purple-700/50' },
                   { rank: 5, user: '@BB_Insider', crowns: '7,250', badge: null, rankBg: 'bg-purple-900/80 text-purple-200 border border-purple-700/50' },
                   { rank: 6, user: '@DelhiDiva', crowns: '6,100', badge: null, rankBg: 'bg-purple-900/80 text-purple-200 border border-purple-700/50' },
@@ -659,8 +702,8 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
 
             {/* Bottom Line Info */}
             <div className="pt-2 border-t border-purple-800/50">
-              <div className="text-[10px] text-purple-300/80 text-center font-medium flex items-center justify-center gap-1">
-                <span>🏆 Top rankers automatically qualify for <strong className="text-amber-300 font-bold">Monthly Raffles</strong> & Season Prizes!</span>
+              <div className="text-[10px] text-purple-200/90 text-center font-medium leading-relaxed">
+                <span>🏆 Weekly rankers win <strong className="text-amber-300 font-bold">₹2,000 / ₹1,500 / ₹1,000</strong> in vouchers from brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more — plus <strong className="text-pink-300 font-bold">Season Hampers</strong>!</span>
               </div>
             </div>
           </div>
@@ -708,6 +751,96 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* SECOND EMAIL SIGNUP SECTION (Bottom of Landing Page) */}
+        <div className="max-w-md mx-auto w-full pt-4 space-y-4">
+          <div className="text-center space-y-1">
+            <p className="text-xs sm:text-sm font-bold text-amber-300 flex items-center justify-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              <span>Don't miss the launch — join the waitlist</span>
+            </p>
+          </div>
+
+          {user ? (
+            <div className="p-6 bg-gradient-to-r from-amber-500/20 via-purple-900/60 to-pink-500/20 border border-amber-400/60 rounded-3xl text-center space-y-3 shadow-2xl backdrop-blur-md animate-fadeIn">
+              <div className="text-4xl">{user.avatar}</div>
+              <h3 className="text-xl font-black text-amber-300">
+                Welcome to the Palace, {user.username}!
+              </h3>
+              <p className="text-xs text-purple-200/90 leading-relaxed max-w-sm mx-auto font-medium">
+                Your account is ready with <strong className="text-amber-300">800 Free Fan Coins</strong>! We'll notify you at <span className="text-white font-bold">{user.email}</span> the instant predictions go live.
+              </p>
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-400/10 border border-amber-400/40 rounded-full text-xs font-extrabold text-amber-300 shadow">
+                <span>Badge: {user.titleBadge}</span>
+              </div>
+            </div>
+          ) : (bottomSubmitted || submitted) ? (
+            <div className="p-6 bg-emerald-950/80 border border-emerald-500/60 rounded-2xl text-emerald-200 text-center space-y-2 shadow-2xl animate-fadeIn">
+              <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
+              <h3 className="text-lg font-black text-white">You're on the VIP Waitlist!</h3>
+              <p className="text-xs text-emerald-200/90">
+                We'll email you the instant predictions go live for the next big episode.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleBottomSubmit} className="space-y-3">
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <div className="relative w-full">
+                  <Mail className="w-5 h-5 text-purple-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="email"
+                    value={bottomEmail}
+                    onChange={(e) => setBottomEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    required
+                    disabled={isSubmittingBottom}
+                    className="w-full bg-[#1A023B] text-white placeholder-purple-400/70 border border-purple-700/60 focus:border-amber-400 focus:outline-none rounded-2xl pl-11 pr-4 py-3.5 text-sm font-medium transition shadow-inner"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingBottom}
+                  id="btn-coming-soon-notify-me-bottom"
+                  className="w-full sm:w-auto shrink-0 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:opacity-95 text-slate-950 font-black px-6 py-3.5 rounded-2xl shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider cursor-pointer border border-amber-300/50"
+                >
+                  {isSubmittingBottom ? (
+                    <span>Joining...</span>
+                  ) : (
+                    <>
+                      <span>NOTIFY ME</span>
+                      <Bell className="w-4 h-4 text-slate-950" />
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {bottomErrorMessage && (
+                <p className="text-xs text-rose-400 font-bold">{bottomErrorMessage}</p>
+              )}
+            </form>
+          )}
+
+          {/* LIVE Waitlist Counter */}
+          <div className="flex items-center justify-center gap-2 text-xs font-bold text-purple-300/90 bg-purple-950/40 border border-purple-800/40 rounded-full px-4 py-1.5 w-fit mx-auto shadow-md">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="text-amber-300 font-extrabold">{waitlistCount.toLocaleString()}</span>
+            <span>Reality TV Superfans on the VIP Waitlist</span>
+          </div>
+
+          {/* INSTAGRAM SNEAK PEEKS LINK */}
+          <div className="pt-1">
+            <a
+              href="https://instagram.com/thefanmahal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-bold text-pink-300 hover:text-amber-300 bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 px-4 py-2 rounded-full transition shadow"
+            >
+              <Instagram className="w-4 h-4 text-[#FF1E94]" />
+              <span>Want sneak peeks & updates? Follow us on IG <strong className="underline text-amber-300">@thefanmahal</strong></span>
+            </a>
           </div>
         </div>
 

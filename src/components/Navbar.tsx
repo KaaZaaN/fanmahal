@@ -2,7 +2,7 @@ import React from 'react';
 import { Crown, Coins, Sparkles, User, Tv, Trophy, Zap, Plus, ShieldAlert, Gift, LogOut } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { FanmahalLogo } from './FanmahalLogo';
-import { calculateRaffleTickets } from '../utils/raffle';
+import { calculateRaffleTickets, ENABLE_MONTHLY_RAFFLE } from '../utils/raffle';
 
 interface NavbarProps {
   currentView: 'predictions' | 'leaderboard' | 'profile' | 'admin';
@@ -115,7 +115,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, setCurr
                   </span>
                 </button>
 
-                {/* Crowns & Tickets Badge */}
+                {/* Crowns Badge */}
                 <div
                   id="navbar-crowns-badge"
                   className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-[#FF1E94]/15 to-[#8B5CF6]/20 border border-[#FF1E94]/30 px-3 py-1.5 rounded-xl text-xs font-bold text-purple-200 shadow-inner"
@@ -127,14 +127,18 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, setCurr
                       <span className="text-yellow-300 font-extrabold text-xs">{user.crowns.toLocaleString()}</span>
                     </div>
                   </div>
-                  <div className="h-3.5 w-[1px] bg-purple-600/40" />
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs">🎟️</span>
-                    <div className="flex flex-col text-left leading-none">
-                      <span className="text-[9px] text-purple-300/70 uppercase tracking-wider font-semibold">Tickets</span>
-                      <span className="text-[#FF1E94] font-extrabold text-xs">{calculateRaffleTickets(user.monthlyCrowns || 0).tickets}</span>
-                    </div>
-                  </div>
+                  {ENABLE_MONTHLY_RAFFLE && (
+                    <>
+                      <div className="h-3.5 w-[1px] bg-purple-600/40" />
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs">🎟️</span>
+                        <div className="flex flex-col text-left leading-none">
+                          <span className="text-[9px] text-purple-300/70 uppercase tracking-wider font-semibold">Tickets</span>
+                          <span className="text-[#FF1E94] font-extrabold text-xs">{calculateRaffleTickets(user.monthlyCrowns || 0).tickets}</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* User Profile Button */}
@@ -170,15 +174,17 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, setCurr
             )}
 
             {/* Test Simulator Trigger Button */}
-            <button
-              onClick={() => setShowRaffleModal(true)}
-              id="navbar-raffle-btn"
-              className="bg-[#22034D] hover:bg-[#2B0460] border border-[#FF1E94]/50 text-[#FF1E94] hover:text-amber-300 text-[11px] font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1 transition shadow"
-              title="View Reward Track 2 Monthly Raffle & Live YouTube Draw Simulator"
-            >
-              <Gift className="w-3.5 h-3.5 text-[#FF1E94]" />
-              <span className="hidden sm:inline">Monthly Raffle</span>
-            </button>
+            {ENABLE_MONTHLY_RAFFLE && (
+              <button
+                onClick={() => setShowRaffleModal(true)}
+                id="navbar-raffle-btn"
+                className="bg-[#22034D] hover:bg-[#2B0460] border border-[#FF1E94]/50 text-[#FF1E94] hover:text-amber-300 text-[11px] font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1 transition shadow"
+                title="View Reward Track 2 Monthly Raffle & Live YouTube Draw Simulator"
+              >
+                <Gift className="w-3.5 h-3.5 text-[#FF1E94]" />
+                <span className="hidden sm:inline">Monthly Raffle</span>
+              </button>
+            )}
 
             <button
               onClick={() => setShowSimulatorModal(true)}

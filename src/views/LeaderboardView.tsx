@@ -2,7 +2,7 @@ import React from 'react';
 import { useGame } from '../context/GameContext';
 import { PRIZE_HAMPERS } from '../data/mockData';
 import { Trophy, Crown, Sparkles, Gift, ShieldAlert, Award, User, Zap, CheckCircle2 } from 'lucide-react';
-import { calculateRaffleTickets } from '../utils/raffle';
+import { calculateRaffleTickets, ENABLE_MONTHLY_RAFFLE } from '../utils/raffle';
 
 export const LeaderboardView: React.FC = () => {
   const { leaderboard, user, setShowRaffleModal } = useGame();
@@ -20,11 +20,15 @@ export const LeaderboardView: React.FC = () => {
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
               <span>Bigg Boss Season 19 Official Hall of Fame</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold font-serif text-white">
-              Royal Crown Leaderboard & Prize Hub
+            <h1 className="text-2xl sm:text-4xl font-extrabold font-serif text-white flex flex-wrap items-baseline gap-2 justify-center sm:justify-start">
+              <span>Leaderboard</span>
+              <span className="text-sm sm:text-base font-sans font-normal text-purple-200/80">(refreshes weekly on Monday)</span>
+              <span>& Prize Hub</span>
             </h1>
             <p className="text-xs sm:text-sm text-purple-200/90 mt-1 max-w-xl">
-              Two reward tracks run side-by-side: Season Skill Leaderboard & Monthly Tier-Elimination Raffle! Official Instagram:{' '}
+              {ENABLE_MONTHLY_RAFFLE
+                ? 'Two reward tracks run side-by-side: Weekly Skill Leaderboard (win ₹2,000, ₹1,500, or ₹1,000 in vouchers from popular brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District, and more) & Monthly Tier-Elimination Raffle! Official Instagram: '
+                : 'Compete on the Weekly Skill Leaderboard to win ₹2,000, ₹1,500, or ₹1,000 in vouchers from popular brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District, and more! Official Instagram: '}
               <a
                 href="https://instagram.com/thefanmahal"
                 target="_blank"
@@ -44,7 +48,7 @@ export const LeaderboardView: React.FC = () => {
                 <span className="text-2xl">{user.avatar}</span>
                 <span className="font-extrabold text-white text-sm">{user.username}</span>
               </div>
-              <div className="grid grid-cols-3 gap-1 pt-1 border-t border-purple-800/40 text-xs">
+              <div className={`grid ${ENABLE_MONTHLY_RAFFLE ? 'grid-cols-3' : 'grid-cols-2'} gap-1 pt-1 border-t border-purple-800/40 text-xs`}>
                 <div>
                   <span className="text-[10px] text-purple-300 block">Rank</span>
                   <span className="font-black text-amber-300">
@@ -57,53 +61,60 @@ export const LeaderboardView: React.FC = () => {
                     {user.crowns.toLocaleString()} 👑
                   </span>
                 </div>
-                <div>
-                  <span className="text-[10px] text-purple-300 block">Tickets</span>
-                  <span className="font-black text-[#FF1E94] flex items-center justify-center gap-0.5">
-                    {calculateRaffleTickets(user.monthlyCrowns || 0).tickets} 🎟️
-                  </span>
-                </div>
+                {ENABLE_MONTHLY_RAFFLE && (
+                  <div>
+                    <span className="text-[10px] text-purple-300 block">Tickets</span>
+                    <span className="font-black text-[#FF1E94] flex items-center justify-center gap-0.5">
+                      {calculateRaffleTickets(user.monthlyCrowns || 0).tickets} 🎟️
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* TWO SEPARATE REWARD TRACKS EXPLANATION BANNER */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* REWARD TRACKS BANNER */}
+      <div className={`grid grid-cols-1 ${ENABLE_MONTHLY_RAFFLE ? 'md:grid-cols-2' : ''} gap-6`}>
         {/* REWARD TRACK 1 CARD */}
         <div className="p-6 rounded-3xl bg-gradient-to-b from-[#2B0460] to-[#12012B] border border-amber-400/40 shadow-xl space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Trophy className="w-6 h-6 text-amber-400" />
-              <h3 className="text-lg font-black text-amber-300">Reward Track 1 — Season Leaderboard</h3>
+              <div className="flex flex-wrap items-baseline gap-1.5">
+                <h3 className="text-lg font-black text-amber-300">Weekly Skill Leaderboard</h3>
+                <span className="text-xs font-normal text-purple-300/80">(refreshes weekly on Monday)</span>
+              </div>
             </div>
           </div>
           <p className="text-xs text-purple-200 leading-relaxed">
-            Ranked by total <strong>Crowns</strong> earned across the entire season (never resets). Top 3 finishers win physical gift hampers from brand sponsors!
+            Ranked by weekly <strong>Crowns</strong> earned. Top 3 finishers win shopping vouchers from popular brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District, and more!
           </p>
           <div className="p-3 bg-[#12012B] rounded-2xl border border-purple-800/40 text-xs space-y-1 text-purple-300">
-            <p>🏆 <strong>1st Place:</strong> Mega Electronics & Apparel Sponsor Hamper</p>
-            <p>🥈 <strong>2nd Place:</strong> Premium Beauty & Grooming Sponsor Hamper</p>
-            <p>🥉 <strong>3rd Place:</strong> Gourmet Snacks & Fitness Gift Hamper</p>
+            <p>🥇 <strong>1st Place:</strong> ₹2,000 Voucher (Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)</p>
+            <p>🥈 <strong>2nd Place:</strong> ₹1,500 Voucher (Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)</p>
+            <p>🥉 <strong>3rd Place:</strong> ₹1,000 Voucher (Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)</p>
           </div>
         </div>
 
-        {/* REWARD TRACK 2 CARD */}
-        <div className="p-6 rounded-3xl bg-gradient-to-b from-[#31056C] to-[#12012B] border border-[#FF1E94]/40 shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Gift className="w-6 h-6 text-[#FF1E94]" />
-              <h3 className="text-lg font-black text-[#FF1E94]">Reward Track 2 — Monthly Raffle</h3>
+        {/* REWARD TRACK 2 CARD (MONTHLY RAFFLE) */}
+        {ENABLE_MONTHLY_RAFFLE && (
+          <div className="p-6 rounded-3xl bg-gradient-to-b from-[#31056C] to-[#12012B] border border-[#FF1E94]/40 shadow-xl space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Gift className="w-6 h-6 text-[#FF1E94]" />
+                <h3 className="text-lg font-black text-[#FF1E94]">Reward Track 2 — Monthly Raffle</h3>
+              </div>
+            </div>
+            <p className="text-xs text-purple-200 leading-relaxed">
+              Earn 1 to 5 Raffle Tickets monthly based on Crowns earned this month. Drawn in <strong>5 Sequential Elimination Rounds</strong> on YouTube live using Random.org's list randomizer!
+            </p>
+            <div className="pt-2">
+              <span className="text-xs text-purple-300/80 font-semibold block">5 Shopping Vouchers (brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more) worth 10K</span>
             </div>
           </div>
-          <p className="text-xs text-purple-200 leading-relaxed">
-            Earn 1 to 5 Raffle Tickets monthly based on Crowns earned this month. Drawn in <strong>5 Sequential Elimination Rounds</strong> on YouTube live using Random.org's list randomizer!
-          </p>
-          <div className="pt-2">
-            <span className="text-xs text-purple-300/80 font-semibold block">5 Shopping Vouchers (Amazon and Flipkart) worth 10K</span>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* TOP 3 PODIUM CARDS */}
@@ -124,12 +135,18 @@ export const LeaderboardView: React.FC = () => {
               {top3[1].username}
             </h3>
             <div className="my-3 py-2 bg-slate-950/40 rounded-2xl border border-slate-700/50">
-              <span className="text-xs text-slate-300 block uppercase tracking-wider">Crowns & Tickets</span>
+              <span className="text-xs text-slate-300 block uppercase tracking-wider">
+                {ENABLE_MONTHLY_RAFFLE ? 'Crowns & Tickets' : 'Crowns Total'}
+              </span>
               <span className="text-lg font-black text-slate-200 flex items-center justify-center gap-1.5">
                 <Crown className="w-4 h-4 text-slate-300" />
                 {top3[1].crowns.toLocaleString()} 👑
-                <span className="text-purple-300 font-normal">|</span>
-                <span className="text-[#FF1E94]">{calculateRaffleTickets(top3[1].crowns).tickets} 🎟️</span>
+                {ENABLE_MONTHLY_RAFFLE && (
+                  <>
+                    <span className="text-purple-300 font-normal">|</span>
+                    <span className="text-[#FF1E94]">{calculateRaffleTickets(top3[1].crowns).tickets} 🎟️</span>
+                  </>
+                )}
               </span>
             </div>
             <p className="text-[11px] text-purple-300/80">
@@ -154,12 +171,19 @@ export const LeaderboardView: React.FC = () => {
               {top3[0].username}
             </h3>
             <div className="my-3 py-2.5 bg-gradient-to-r from-amber-500/20 via-purple-900/40 to-amber-500/20 rounded-2xl border border-amber-400/50">
-              <span className="text-xs text-amber-300/80 block uppercase tracking-wider font-semibold">Leaderboard Leader</span>
-              <span className="text-xl font-black text-yellow-300 flex items-center justify-center gap-1.5">
+              <div className="flex flex-wrap items-baseline justify-center gap-1">
+                <span className="text-xs text-amber-300/80 uppercase tracking-wider font-semibold">Leaderboard Leader</span>
+                <span className="text-[10px] font-normal text-purple-300/80">(refreshes weekly on Monday)</span>
+              </div>
+              <span className="text-xl font-black text-yellow-300 flex items-center justify-center gap-1.5 mt-0.5">
                 <Crown className="w-5 h-5 text-amber-400 drop-shadow-[0_2px_4px_rgba(245,197,66,0.8)]" />
                 {top3[0].crowns.toLocaleString()} 👑
-                <span className="text-purple-300 font-normal">|</span>
-                <span className="text-[#FF1E94]">{calculateRaffleTickets(top3[0].crowns).tickets} 🎟️</span>
+                {ENABLE_MONTHLY_RAFFLE && (
+                  <>
+                    <span className="text-purple-300 font-normal">|</span>
+                    <span className="text-[#FF1E94]">{calculateRaffleTickets(top3[0].crowns).tickets} 🎟️</span>
+                  </>
+                )}
               </span>
             </div>
             <p className="text-xs text-purple-200">
@@ -184,12 +208,18 @@ export const LeaderboardView: React.FC = () => {
               {top3[2].username}
             </h3>
             <div className="my-3 py-2 bg-slate-950/40 rounded-2xl border border-amber-800/50">
-              <span className="text-xs text-amber-300/80 block uppercase tracking-wider">Crowns & Tickets</span>
+              <span className="text-xs text-amber-300/80 block uppercase tracking-wider">
+                {ENABLE_MONTHLY_RAFFLE ? 'Crowns & Tickets' : 'Crowns Total'}
+              </span>
               <span className="text-lg font-black text-amber-400 flex items-center justify-center gap-1.5">
                 <Crown className="w-4 h-4 text-amber-500" />
                 {top3[2].crowns.toLocaleString()} 👑
-                <span className="text-purple-300 font-normal">|</span>
-                <span className="text-[#FF1E94]">{calculateRaffleTickets(top3[2].crowns).tickets} 🎟️</span>
+                {ENABLE_MONTHLY_RAFFLE && (
+                  <>
+                    <span className="text-purple-300 font-normal">|</span>
+                    <span className="text-[#FF1E94]">{calculateRaffleTickets(top3[2].crowns).tickets} 🎟️</span>
+                  </>
+                )}
               </span>
             </div>
             <p className="text-[11px] text-purple-300/80">
@@ -238,9 +268,12 @@ export const LeaderboardView: React.FC = () => {
 
       {/* FULL RANKS TABLE (RANKS 4+) */}
       <div className="bg-[#170234] border border-purple-800/40 rounded-3xl p-5 shadow-xl">
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <Award className="w-5 h-5 text-amber-400" />
-          <span>Full Leaderboard Rankings</span>
+        <h3 className="text-lg font-bold text-white mb-4 flex flex-wrap items-baseline gap-2">
+          <div className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-amber-400" />
+            <span>Leaderboard</span>
+          </div>
+          <span className="text-xs font-normal text-purple-300/80">(refreshes weekly on Monday)</span>
         </h3>
 
         <div className="overflow-x-auto">
@@ -251,7 +284,7 @@ export const LeaderboardView: React.FC = () => {
                 <th className="py-3 px-3">User & Handle</th>
                 <th className="py-3 px-3">Fan Title</th>
                 <th className="py-3 px-3 text-right">Crowns</th>
-                <th className="py-3 px-3 text-right">Raffle Tickets</th>
+                {ENABLE_MONTHLY_RAFFLE && <th className="py-3 px-3 text-right">Raffle Tickets</th>}
                 <th className="py-3 px-3 text-right">Win Rate</th>
               </tr>
             </thead>
@@ -285,9 +318,11 @@ export const LeaderboardView: React.FC = () => {
                   <td className="py-3 px-3 text-right font-bold text-yellow-300">
                     {entry.crowns.toLocaleString()} 👑
                   </td>
-                  <td className="py-3 px-3 text-right font-bold text-[#FF1E94]">
-                    {calculateRaffleTickets(entry.crowns).tickets} 🎟️
-                  </td>
+                  {ENABLE_MONTHLY_RAFFLE && (
+                    <td className="py-3 px-3 text-right font-bold text-[#FF1E94]">
+                      {calculateRaffleTickets(entry.crowns).tickets} 🎟️
+                    </td>
+                  )}
                   <td className="py-3 px-3 text-right text-purple-200">
                     {entry.winRate}% ({entry.predictionsWon}W)
                   </td>

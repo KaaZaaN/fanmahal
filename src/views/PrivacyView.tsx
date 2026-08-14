@@ -57,7 +57,7 @@ export const PrivacyView: React.FC<PrivacyViewProps> = ({ onNavigateBack }) => {
               <ul className="list-disc list-inside space-y-1 text-purple-300/80 text-xs mt-1">
                 <li>Email address (required, via Google Sign-In, email magic link, or email/password)</li>
                 <li>Public display handle / username (chosen by you)</li>
-                <li>Instagram handle (mandatory — used only for public display in raffle results and winner announcements; see Section 4)</li>
+                <li>Instagram handle (mandatory — used only for public display in leaderboard rankings and winner announcements; see Section 4)</li>
                 <li>Phone number (currently optional; will become mandatory for all users in a future phase, announced in advance — see Section 8)</li>
                 <li>Profile avatar selection</li>
               </ul>
@@ -94,7 +94,7 @@ export const PrivacyView: React.FC<PrivacyViewProps> = ({ onNavigateBack }) => {
           <ul className="list-disc list-inside space-y-1.5 text-sm text-purple-200/90 leading-relaxed pl-2 border-l-2 border-[#FF1E94]/40">
             <li>To create and maintain your account</li>
             <li>To operate the core prediction/leaderboard game mechanics</li>
-            <li>To determine raffle and leaderboard prize eligibility</li>
+            <li>To determine leaderboard and milestone prize eligibility</li>
             <li>To deliver prizes (hampers, vouchers) to verified winners</li>
             <li>To detect and prevent fraud, duplicate accounts, and abuse (see Section 5)</li>
             <li>To send you service-related communications (e.g., about your account, prize wins, or important platform changes)</li>
@@ -131,9 +131,6 @@ export const PrivacyView: React.FC<PrivacyViewProps> = ({ onNavigateBack }) => {
             <li>
               <strong>IPQualityScore (IPQS)</strong> — used solely for fraud/duplicate-account detection (IP and device reputation scoring). We do not use this data for any other purpose.
             </li>
-            <li>
-              <strong>Random.org</strong> — used to conduct the monthly raffle draw publicly and verifiably. Only your Instagram handle (not your email, phone, or real name) is used in this process.
-            </li>
           </ul>
         </div>
 
@@ -146,8 +143,7 @@ export const PrivacyView: React.FC<PrivacyViewProps> = ({ onNavigateBack }) => {
             Your <strong>Instagram handle</strong> — not your email, phone number, or real name — is the only identifying information shown publicly on:
           </p>
           <ul className="list-disc list-inside space-y-1 text-sm text-purple-200/90 leading-relaxed pl-2 border-l-2 border-[#FF1E94]/40">
-            <li>The season leaderboard</li>
-            <li>Monthly raffle eligible-participant lists</li>
+            <li>The weekly and season leaderboards</li>
             <li>Winner announcements (in-app and on our official YouTube channel/Instagram)</li>
           </ul>
           <p className="text-xs text-purple-300/80">

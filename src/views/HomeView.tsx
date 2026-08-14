@@ -3,6 +3,7 @@ import { useGame } from '../context/GameContext';
 import { Category, UserPrediction } from '../types';
 import { PredictionCard } from '../components/PredictionCard';
 import { Crown, Coins, Sparkles, Tv, Flame, Search, Filter, ShieldCheck, Zap, Gift, Clock } from 'lucide-react';
+import { ENABLE_MONTHLY_RAFFLE } from '../utils/raffle';
 
 export const HomeView: React.FC = () => {
   const {
@@ -141,7 +142,7 @@ export const HomeView: React.FC = () => {
             </h1>
 
             <p className="text-xs sm:text-sm text-purple-200/90 leading-relaxed">
-              Choose your weekly predictions across evictions, captaincy tasks & house drama. Stake your free weekly Fan Coins to climb the Season Leaderboard and earn Monthly Raffle Tickets for Brand Hampers & Shopping Vouchers!
+              Choose your weekly predictions across evictions, captaincy tasks & house drama. Stake your free weekly Fan Coins to climb the Leaderboard and win ₹2,000 / ₹1,500 / ₹1,000 in vouchers from popular brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District, and more!
             </p>
 
             {/* Quick Stats Pill */}
@@ -223,7 +224,7 @@ export const HomeView: React.FC = () => {
       </div>
 
       {/* YOUTUBE LIVE STREAM RAFFLE NOTICE BANNER */}
-      {youtubeRaffleNotice && youtubeRaffleNotice.active && (
+      {ENABLE_MONTHLY_RAFFLE && youtubeRaffleNotice && youtubeRaffleNotice.active && (
         <div className="bg-gradient-to-r from-[#2B0352] via-[#520338] to-[#1F023E] border border-rose-500/40 rounded-2xl p-4 shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
             <div className="p-3 bg-rose-500/20 rounded-2xl border border-rose-500/40 shrink-0">

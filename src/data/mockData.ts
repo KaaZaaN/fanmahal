@@ -7,11 +7,11 @@ export const MOCK_LEADERBOARD: LeaderboardEntry[] = [];
 export const PRIZE_HAMPERS: PrizeHamper[] = [
   {
     rankRange: '1st Place Winner',
-    title: 'The Royal Fan Palace Trophy, Shopping Vouchers & Mega Hamper',
+    title: 'The Royal Fan Palace Trophy, Brand Vouchers & Mega Hamper',
     sponsor: 'Powered by Royal Brands & Fanmahal',
     items: [
       '🏆 Official Gold Plated Fanmahal Champion Trophy',
-      '🛒 ₹10,000 Amazon / Flipkart Shopping Vouchers',
+      '🛒 ₹10,000 Vouchers (brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)',
       '📱 Premium Brand Smartwatch & Wireless Earbuds',
       '👕 Exclusive Signed Reality TV Merchandise',
       '🎟️ VIP Pass for Live Finale Screening Event',
@@ -22,11 +22,11 @@ export const PRIZE_HAMPERS: PrizeHamper[] = [
   },
   {
     rankRange: '2nd Place Winner',
-    title: 'Silver Crown Fan Hamper & Shopping Vouchers',
+    title: 'Silver Crown Fan Hamper & Brand Vouchers',
     sponsor: 'Sponsored by Official Merch Partners',
     items: [
       '🥈 Official Silver Fanmahal Crown Plaque',
-      '🛍️ ₹5,000 Amazon / Brand Shopping Vouchers',
+      '🛍️ ₹5,000 Vouchers (brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)',
       '🧥 Custom Embroidered Reality TV Season Hoodie',
       '🎧 Premium Noise Cancelling Headphones',
       '🎁 ₹8,000 Gourmet Food & Beverage Gift Basket',
@@ -36,11 +36,11 @@ export const PRIZE_HAMPERS: PrizeHamper[] = [
   },
   {
     rankRange: '3rd Place Winner',
-    title: 'Bronze Star Fan Hamper & Shopping Vouchers',
+    title: 'Bronze Star Fan Hamper & Brand Vouchers',
     sponsor: 'Sponsored by Fanmahal Community',
     items: [
       '🥉 Official Bronze Fanmahal Medal',
-      '🛍️ ₹3,000 Brand Shopping Vouchers',
+      '🛍️ ₹3,000 Vouchers (brands like Myntra, Amazon, Flipkart, Blinkit, Swiggy, District & more)',
       '☕ Custom Royal Mug & T-Shirt Pack',
       '🎁 ₹5,000 Premium Snack & Goodies Basket',
     ],

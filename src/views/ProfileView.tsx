@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { User, Coins, Crown, Sparkles, Tv, ShieldCheck, RefreshCw, CheckCircle2, Clock, XCircle, Users, Edit3, Save, Gift, AlertTriangle, ExternalLink, Copy, Check, Share2, LogOut } from 'lucide-react';
 import { PRESET_AVATARS, PRESET_BADGES } from '../data/mockData';
-import { calculateRaffleTickets } from '../utils/raffle';
+import { calculateRaffleTickets, ENABLE_MONTHLY_RAFFLE } from '../utils/raffle';
 
 export const ProfileView: React.FC = () => {
   const {
@@ -185,7 +185,7 @@ export const ProfileView: React.FC = () => {
                 className="w-full bg-[#1A023B] border border-[#FF1E94]/60 focus:border-amber-400 rounded-xl px-3 py-2 text-xs font-bold text-white placeholder-purple-400/50 outline-none"
               />
               <p className="text-[11px] text-amber-200/90 leading-relaxed font-medium">
-                <strong>⚠️ Mandatory Prize Delivery Disclaimer:</strong> Entering a valid Instagram handle (`@username`) is strictly required to receive physical brand sponsor hampers and raffle ticket prizes. All winner list announcements show Instagram Handles ONLY — your real name, email, and phone number are never shared publicly.
+                <strong>⚠️ Mandatory Prize Delivery Disclaimer:</strong> Entering a valid Instagram handle (`@username`) is strictly required to receive weekly voucher prizes and physical brand sponsor hampers. All winner list announcements show Instagram Handles ONLY — your real name, email, and phone number are never shared publicly.
               </p>
             </div>
 
@@ -360,45 +360,47 @@ export const ProfileView: React.FC = () => {
           </div>
 
           {/* TRACK 2 MONTHLY RAFFLE STANDING CARD */}
-          <div className="p-4 rounded-2xl bg-[#12012B] border border-amber-400/40 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Gift className="w-5 h-5 text-[#FF1E94]" />
-                <span className="text-xs font-black text-white">Reward Track 2: Monthly Raffle Tickets</span>
+          {ENABLE_MONTHLY_RAFFLE && (
+            <div className="p-4 rounded-2xl bg-[#12012B] border border-amber-400/40 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-[#FF1E94]" />
+                  <span className="text-xs font-black text-white">Reward Track 2: Monthly Raffle Tickets</span>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                  {raffleInfo.tickets} 🎟️ Qualified
+                </span>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                {raffleInfo.tickets} 🎟️ Qualified
-              </span>
+
+              <p className="text-[11px] text-purple-300/80">
+                {raffleInfo.currentTierLabel}. Crowns earned this month automatically qualify you for the end-of-month 5-Round Random.org YouTube live draw!
+              </p>
+
+              {raffleInfo.nextTierThreshold && (
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[10px] font-bold">
+                    <span className="text-purple-300">Progress to Next Ticket</span>
+                    <span className="text-amber-300">{raffleInfo.crownsNeededForNextTier.toLocaleString()} Crowns needed</span>
+                  </div>
+                  <div className="w-full h-2 bg-purple-950 rounded-full overflow-hidden border border-purple-800/50">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#FF1E94] to-[#F5C542] rounded-full transition-all duration-500"
+                      style={{ width: `${raffleInfo.progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={() => setShowRaffleModal(true)}
+                id="profile-open-raffle-sim-btn"
+                className="w-full py-2 bg-gradient-to-r from-purple-900/80 to-[#22034D] hover:border-amber-400 border border-purple-600/50 rounded-xl text-xs font-bold text-amber-300 flex items-center justify-center gap-1.5 transition"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>View Live YouTube 5-Round Draw Simulator</span>
+              </button>
             </div>
-
-            <p className="text-[11px] text-purple-300/80">
-              {raffleInfo.currentTierLabel}. Crowns earned this month automatically qualify you for the end-of-month 5-Round Random.org YouTube live draw!
-            </p>
-
-            {raffleInfo.nextTierThreshold && (
-              <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-bold">
-                  <span className="text-purple-300">Progress to Next Ticket</span>
-                  <span className="text-amber-300">{raffleInfo.crownsNeededForNextTier.toLocaleString()} Crowns needed</span>
-                </div>
-                <div className="w-full h-2 bg-purple-950 rounded-full overflow-hidden border border-purple-800/50">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#FF1E94] to-[#F5C542] rounded-full transition-all duration-500"
-                    style={{ width: `${raffleInfo.progressPercent}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={() => setShowRaffleModal(true)}
-              id="profile-open-raffle-sim-btn"
-              className="w-full py-2 bg-gradient-to-r from-purple-900/80 to-[#22034D] hover:border-amber-400 border border-purple-600/50 rounded-xl text-xs font-bold text-amber-300 flex items-center justify-center gap-1.5 transition"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>View Live YouTube 5-Round Draw Simulator</span>
-            </button>
-          </div>
+          )}
         </div>
       </div>
 

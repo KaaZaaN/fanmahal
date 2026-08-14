@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Sparkles, Trophy, Crown, Play, CheckCircle2, AlertTriangle, ShieldCheck, Youtube, ExternalLink, RefreshCw } from 'lucide-react';
 import { useGame } from '../context/GameContext';
-import { RAFFLE_ROUNDS, calculateRaffleTickets } from '../utils/raffle';
+import { RAFFLE_ROUNDS, calculateRaffleTickets, ENABLE_MONTHLY_RAFFLE } from '../utils/raffle';
 import confetti from 'canvas-confetti';
 
 interface DrawnWinner {
@@ -18,7 +18,7 @@ export const RaffleSimulatorModal: React.FC = () => {
   const [currentRoundIndex, setCurrentRoundIndex] = useState<number | null>(null);
   const [drawHistory, setDrawHistory] = useState<DrawnWinner[]>([]);
 
-  if (!showRaffleModal) return null;
+  if (!ENABLE_MONTHLY_RAFFLE || !showRaffleModal) return null;
 
   const userRaffleInfo = user ? calculateRaffleTickets(user.monthlyCrowns || 0) : null;
 

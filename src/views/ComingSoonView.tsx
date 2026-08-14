@@ -24,7 +24,7 @@ import {
   Crown,
 } from 'lucide-react';
 import { db } from '../lib/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, addDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { useGame } from '../context/GameContext';
 
 interface ComingSoonViewProps {
@@ -160,32 +160,19 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
     setErrorMessage('');
 
     try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          source: 'coming_soon_landing',
-        }),
+      await addDoc(collection(db, 'waitlist'), {
+        email: email.trim().toLowerCase(),
+        createdAt: new Date().toISOString(),
+        timestamp: serverTimestamp(),
+        source: 'coming_soon_landing',
       });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        throw new Error(data?.message || 'Failed to submit waitlist registration');
-      }
 
       setSubmitted(true);
       setBottomSubmitted(true);
       setEmail('');
     } catch (err: any) {
-      console.warn('Waitlist API notice:', err);
-      // Even if network blips or is offline, show confirmation to the user
-      setSubmitted(true);
-      setBottomSubmitted(true);
-      setEmail('');
+      console.error('Failed to submit waitlist registration to Firestore:', err);
+      setErrorMessage(err?.message || 'Unable to register for the waitlist. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -202,31 +189,19 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
     setBottomErrorMessage('');
 
     try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: bottomEmail.trim().toLowerCase(),
-          source: 'coming_soon_landing_bottom',
-        }),
+      await addDoc(collection(db, 'waitlist'), {
+        email: bottomEmail.trim().toLowerCase(),
+        createdAt: new Date().toISOString(),
+        timestamp: serverTimestamp(),
+        source: 'coming_soon_landing_bottom',
       });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        throw new Error(data?.message || 'Failed to submit waitlist registration');
-      }
 
       setBottomSubmitted(true);
       setSubmitted(true);
       setBottomEmail('');
     } catch (err: any) {
-      console.warn('Waitlist API notice:', err);
-      setBottomSubmitted(true);
-      setSubmitted(true);
-      setBottomEmail('');
+      console.error('Failed to submit bottom waitlist registration to Firestore:', err);
+      setBottomErrorMessage(err?.message || 'Unable to register for the waitlist. Please check your connection and try again.');
     } finally {
       setIsSubmittingBottom(false);
     }

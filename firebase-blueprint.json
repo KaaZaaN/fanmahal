@@ -39,6 +39,15 @@
         "source": { "type": "string" }
       },
       "required": ["email"]
+    },
+    "public_stats": {
+      "title": "Public Stats",
+      "description": "Aggregated public platform metrics such as waitlist counter",
+      "type": "object",
+      "properties": {
+        "count": { "type": "number" }
+      },
+      "required": ["count"]
     }
   }
 }

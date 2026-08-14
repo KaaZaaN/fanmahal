@@ -3,6 +3,7 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, query, where, writeBatch } from 'firebase/firestore';
+import handleWaitlist from './api/waitlist.ts';
 
 const appDir = process.cwd();
 
@@ -121,6 +122,9 @@ async function startServer() {
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', service: 'Fanmahal Secure Resolution Engine' });
   });
+
+  // Waitlist Registration Endpoint (Firebase Admin SDK)
+  app.post('/api/waitlist', handleWaitlist);
 
   /**
    * SECURE CLOUD FUNCTION: /api/admin/resolve (Aliases: /api/admin/resolve-question, /api/admin/settle-question)

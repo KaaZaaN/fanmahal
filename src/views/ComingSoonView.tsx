@@ -24,7 +24,7 @@ import {
   Crown,
 } from 'lucide-react';
 import { db } from '../lib/firebase';
-import { collection, addDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { useGame } from '../context/GameContext';
 
 interface ComingSoonViewProps {
@@ -121,15 +121,21 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  // Subscribe to live waitlist count from Firestore
+  // Subscribe to live waitlist count from Firestore public_stats/waitlist_counter
   useEffect(() => {
     let unsubscribe = () => {};
     try {
-      const q = collection(db, 'waitlist');
+      const counterDocRef = doc(db, 'public_stats', 'waitlist_counter');
       unsubscribe = onSnapshot(
-        q,
+        counterDocRef,
         (snapshot) => {
-          setWaitlistCount(BASE_WAITLIST_COUNT + snapshot.size);
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            const count = typeof data?.count === 'number' ? data.count : 0;
+            setWaitlistCount(BASE_WAITLIST_COUNT + count);
+          } else {
+            setWaitlistCount(BASE_WAITLIST_COUNT);
+          }
         },
         (error) => {
           console.warn('Firestore waitlist count listener notice:', error);
@@ -154,18 +160,29 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
     setErrorMessage('');
 
     try {
-      await addDoc(collection(db, 'waitlist'), {
-        email: email.trim().toLowerCase(),
-        createdAt: new Date().toISOString(),
-        timestamp: serverTimestamp(),
-        source: 'coming_soon_landing',
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          source: 'coming_soon_landing',
+        }),
       });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data?.message || 'Failed to submit waitlist registration');
+      }
 
       setSubmitted(true);
       setBottomSubmitted(true);
       setEmail('');
     } catch (err: any) {
-      console.warn('Failed to store waitlist signup to Firestore:', err);
+      console.warn('Waitlist API notice:', err);
+      // Even if network blips or is offline, show confirmation to the user
       setSubmitted(true);
       setBottomSubmitted(true);
       setEmail('');
@@ -185,18 +202,28 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
     setBottomErrorMessage('');
 
     try {
-      await addDoc(collection(db, 'waitlist'), {
-        email: bottomEmail.trim().toLowerCase(),
-        createdAt: new Date().toISOString(),
-        timestamp: serverTimestamp(),
-        source: 'coming_soon_landing_bottom',
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: bottomEmail.trim().toLowerCase(),
+          source: 'coming_soon_landing_bottom',
+        }),
       });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data?.message || 'Failed to submit waitlist registration');
+      }
 
       setBottomSubmitted(true);
       setSubmitted(true);
       setBottomEmail('');
     } catch (err: any) {
-      console.warn('Failed to store waitlist signup to Firestore:', err);
+      console.warn('Waitlist API notice:', err);
       setBottomSubmitted(true);
       setSubmitted(true);
       setBottomEmail('');
